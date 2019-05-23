@@ -1,7 +1,7 @@
 package org.hanframework.context;
 
 import org.hanframework.beans.beanfactory.ConfigurableBeanFactory;
-import org.hanframework.core.Configuration;
+import org.hanframework.env.Configuration;
 
 /**
  * 最小化接口

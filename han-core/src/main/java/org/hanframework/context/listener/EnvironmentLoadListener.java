@@ -1,12 +1,12 @@
 package org.hanframework.context.listener;
 
 import org.hanframework.context.listener.event.EnvironmentLoadEvent;
-import org.hanframework.core.env.ConfigurableEnvironment;
-import org.hanframework.core.env.postprocessor.EnvironmentPostProcessor;
-import org.hanframework.core.env.resolver.source.MutablePropertySources;
-import org.hanframework.core.env.resolver.source.PropertiesPropertySource;
-import org.hanframework.core.env.resource.Resource;
-import org.hanframework.core.env.resource.impl.PathMatchingResourcePatternResolver;
+import org.hanframework.env.ConfigurableEnvironment;
+import org.hanframework.env.postprocessor.EnvironmentPostProcessor;
+import org.hanframework.env.resolver.source.MutablePropertySources;
+import org.hanframework.env.resolver.source.PropertiesPropertySource;
+import org.hanframework.env.resource.Resource;
+import org.hanframework.env.resource.impl.PathMatchingResourcePatternResolver;
 import org.hanframework.tool.extension.CommandLineArgsParser;
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import java.util.Properties;
  * @author liuxin
  * @version Id: EnvironmentLoadListener.java, v 0.1 2018-12-11 14:26
  */
-public abstract class EnvironmentLoadListener implements ApplicationListener<EnvironmentLoadEvent>, EnvironmentPostProcessor {
+public abstract class EnvironmentLoadListener implements ApplicationListener<EnvironmentLoadEvent> {
 
     private static final String COMMAND_LINE_ARGS = "commandLineArgs";
     /**
@@ -30,8 +30,11 @@ public abstract class EnvironmentLoadListener implements ApplicationListener<Env
     /**
      * 激活的配置文件路径
      */
-    public static final String ACTIVE_PROFILES_PROPERTY = "smile.profiles.active";
+    public static final String ACTIVE_PROFILES_PROPERTY = "han.profiles.active";
 
+    /**
+     * 默认的配置名
+     */
     private static final String DEFAULT_CONFIG_LOCATION = "application";
 
     private static final String PROFILE_NAME = "default";
@@ -83,16 +86,4 @@ public abstract class EnvironmentLoadListener implements ApplicationListener<Env
      */
     abstract Properties loadPertiesForFileSuffixName(Resource resource);
 
-
-    @Override
-    public void postProcessEnvironment(ConfigurableEnvironment environment) {
-        String[] sources = DEFAULT_SEARCH_LOCATIONS.split(",");
-        for (String source : sources) {
-            File file = new File(source);
-            if (file.isDirectory()) {
-
-            }
-            System.err.println("配置文件信息");
-        }
-    }
 }

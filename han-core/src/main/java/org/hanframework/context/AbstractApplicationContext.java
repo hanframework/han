@@ -1,6 +1,8 @@
 package org.hanframework.context;
 
 import lombok.extern.slf4j.Slf4j;
+import org.hanframework.env.ConfigurableEnvironment;
+import org.hanframework.env.StandardEnvironment;
 import org.hanframework.tool.app.ApplicationPid;
 import org.hanframework.beans.beandefinition.BeanDefinition;
 import org.hanframework.beans.beanfactory.BeanFactory;
@@ -15,9 +17,8 @@ import org.hanframework.beans.postprocessor.impl.AutowiredAnnotationBeanPostProc
 import org.hanframework.context.listener.ApplicationListener;
 import org.hanframework.context.listener.DefaultEnvironmentLoadListener;
 import org.hanframework.context.listener.event.EnvironmentLoadEvent;
-import org.hanframework.core.Configuration;
-import org.hanframework.core.env.*;
-import org.hanframework.core.env.postprocessor.EnvironmentPostProcessor;
+import org.hanframework.env.Configuration;
+import org.hanframework.env.postprocessor.EnvironmentPostProcessor;
 import org.hanframework.tool.asserts.Assert;
 import org.hanframework.tool.date.StopWatch;
 
@@ -89,7 +90,7 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
      * @param args
      * @return
      */
-    protected void prepareEnvironment(String[] args) {
+    public void prepareEnvironment(String[] args) {
         //生层一个环境加载时间
         EnvironmentLoadEvent loadEvent = new EnvironmentLoadEvent(getConfigurableEnvironment(), args);
         new DefaultEnvironmentLoadListener().onApplicationEvent(loadEvent);
@@ -126,6 +127,7 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
     protected void invokerEnvironmentPostProcessors(ConfigurableBeanFactory configurableBeanFactory, ConfigurableEnvironment configurableEnvironment) {
         DefaultListableBeanFactory listableBeanFactory = (DefaultListableBeanFactory) configurableBeanFactory;
         //从IOC容器中根据类型获取到的处理器
+        //留给用户对配置文件修改的机会
         String[] environmentPostProcessorNames = listableBeanFactory.getBeanNamesForType(EnvironmentPostProcessor.class);
         for (String environmentPostProcessorName : environmentPostProcessorNames) {
             EnvironmentPostProcessor environmentPostProcessor = (EnvironmentPostProcessor) listableBeanFactory.getBean(environmentPostProcessorName);

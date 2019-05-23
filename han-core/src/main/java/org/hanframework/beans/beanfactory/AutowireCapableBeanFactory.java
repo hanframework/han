@@ -36,7 +36,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 
     Object resolveDependency(String beanName) throws Exception;
 
-    Object resolveDependency(Class beanType) throws Exception;
+    Object resolveDependency(Class<?> beanType) throws Exception;
 
 
     //-------------------------------------------------------------------------

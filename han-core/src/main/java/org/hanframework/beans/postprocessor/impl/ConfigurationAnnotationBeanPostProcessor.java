@@ -10,13 +10,11 @@ import org.hanframework.beans.beanfactory.impl.ObjectFactory;
 import org.hanframework.beans.postprocessor.BeanPostProcessor;
 import org.hanframework.beans.postprocessor.annotation.BeanProcessor;
 import org.hanframework.context.aware.BeanFactoryAware;
-import org.hanframework.core.env.annotation.Value;
+import org.hanframework.env.annotation.Value;
 import org.hanframework.tool.annotation.AnnotationTools;
 import org.hanframework.tool.annotation.type.AnnotationMetadata;
 import org.hanframework.tool.reflection.ClassTools;
 import org.hanframework.tool.string.StringTools;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;

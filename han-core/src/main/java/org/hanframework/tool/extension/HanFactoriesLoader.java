@@ -2,8 +2,8 @@ package org.hanframework.tool.extension;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hanframework.core.classpathscan.AutoConfigureException;
-import org.hanframework.core.env.resource.Resource;
-import org.hanframework.core.env.resource.impl.PathMatchingResourcePatternResolver;
+import org.hanframework.env.resource.Resource;
+import org.hanframework.env.resource.impl.PathMatchingResourcePatternResolver;
 import org.hanframework.tool.asserts.Assert;
 import org.hanframework.tool.string.StreamTools;
 import org.hanframework.tool.yaml.YamlTools;

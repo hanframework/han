@@ -1,8 +1,11 @@
 package org.hanframework.beans.parse;
 
+import org.hanframework.beans.beandefinition.ValueHolder;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.util.List;
 
 /**
  * @author liuxin
@@ -10,26 +13,32 @@ import java.lang.reflect.Parameter;
  */
 public class ConfigurationBeanMethod {
 
-    Method beanMethod;
-    Parameter[] parameters;
-    Class parentBeanCls;
+    private Method beanMethod;
+    private Parameter[] parameters;
+    private Class parentBeanCls;
+    private List<ValueHolder> valueHolders;
 
-    public ConfigurationBeanMethod(Method beanMethod, Parameter[] parameters, Class parentBeanCls) {
+    public ConfigurationBeanMethod(Method beanMethod, Parameter[] parameters, Class parentBeanCls, List<ValueHolder> valueHolders) {
         this.beanMethod = beanMethod;
         this.parameters = parameters;
         this.parentBeanCls = parentBeanCls;
+        this.valueHolders = valueHolders;
     }
 
     public Parameter[] getParameters() {
         return parameters;
     }
 
-    public Class getParentBeanCls() {
+    public Class<?> getParentBeanCls() {
         return parentBeanCls;
     }
 
     public Method getBeanMethod() {
         return beanMethod;
+    }
+
+    public List<ValueHolder> getValueHolders() {
+        return valueHolders;
     }
 
     /**

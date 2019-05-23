@@ -23,7 +23,7 @@ public class ConstructorMetadata {
     private Constructor originalConstructor;
 
 
-    public ConstructorArgumentValues getConstructorArgumentValues() {
+    public ConstructorArgumentValues getConstructorArguments() {
         return constructorArgumentValues;
     }
 

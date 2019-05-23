@@ -1,24 +1,19 @@
 package org.hanframework.web.core;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hanframework.beans.annotation.HanComponent;
 import org.hanframework.beans.beanfactory.BeanFactory;
 import org.hanframework.beans.postprocessor.impl.MethodParameter;
 import org.hanframework.context.ApplicationContext;
 import org.hanframework.context.aware.ApplicationContextAware;
-import org.hanframework.core.Configuration;
 import org.hanframework.web.handler.HandlerMethod;
 import org.hanframework.web.handler.URL;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author liuxin

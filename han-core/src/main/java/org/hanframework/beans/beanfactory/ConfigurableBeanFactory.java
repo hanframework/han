@@ -3,8 +3,8 @@ package org.hanframework.beans.beanfactory;
 import org.hanframework.beans.beandefinition.BeanDefinition;
 import org.hanframework.beans.condition.ConditionHandler;
 import org.hanframework.beans.postprocessor.BeanPostProcessor;
-import org.hanframework.core.Configuration;
-import org.hanframework.core.env.resolver.MultiPropertyResolver;
+import org.hanframework.env.Configuration;
+import org.hanframework.env.resolver.MultiPropertyResolver;
 import java.util.List;
 import java.util.Map;
 

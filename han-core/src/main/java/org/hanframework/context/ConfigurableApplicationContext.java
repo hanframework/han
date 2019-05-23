@@ -3,7 +3,7 @@ package org.hanframework.context;
 import org.hanframework.beans.beandefinition.BeanDefinition;
 import org.hanframework.beans.beanfactory.postprocessor.BeanFactoryPostProcessor;
 import org.hanframework.context.listener.ApplicationListener;
-import org.hanframework.core.env.ConfigurableEnvironment;
+import org.hanframework.env.ConfigurableEnvironment;
 
 import java.util.Map;
 

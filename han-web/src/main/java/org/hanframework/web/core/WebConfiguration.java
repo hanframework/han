@@ -1,6 +1,6 @@
 package org.hanframework.web.core;
 
-import org.hanframework.core.ModuleConfiguration;
+import org.hanframework.env.ModuleConfiguration;
 
 /**
  * web的配置

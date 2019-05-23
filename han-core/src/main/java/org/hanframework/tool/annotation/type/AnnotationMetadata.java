@@ -27,4 +27,7 @@ public interface AnnotationMetadata extends ClassMetadata, AnnotatedTypeMetadata
      * @return 注解实例
      */
     <A extends Annotation> A getAnnotation(Class<A> annotationClass);
+
+
+
 }

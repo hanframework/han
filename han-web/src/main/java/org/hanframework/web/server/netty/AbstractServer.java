@@ -5,7 +5,7 @@ import org.hanframework.beans.beanfactory.lifecycle.DisposableBean;
 import org.hanframework.beans.beanfactory.lifecycle.InitializingBean;
 import org.hanframework.context.ApplicationContext;
 import org.hanframework.context.aware.ApplicationContextAware;
-import org.hanframework.core.Configuration;
+import org.hanframework.env.Configuration;
 import org.hanframework.web.server.HanServer;
 
 /**

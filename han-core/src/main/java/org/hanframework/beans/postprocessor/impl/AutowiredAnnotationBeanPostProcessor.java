@@ -2,8 +2,6 @@ package org.hanframework.beans.postprocessor.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hanframework.beans.exception.BeanCurrentlyInCreationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.hanframework.beans.annotation.Autowired;
 import org.hanframework.beans.annotation.InsertBean;
 import org.hanframework.beans.beanfactory.BeanFactory;
@@ -13,8 +11,8 @@ import org.hanframework.beans.exception.BeanCreationException;
 import org.hanframework.beans.postprocessor.InstantiationAwareBeanPostProcessor;
 import org.hanframework.beans.postprocessor.annotation.BeanProcessor;
 import org.hanframework.context.aware.BeanFactoryAware;
-import org.hanframework.core.env.annotation.Profile;
-import org.hanframework.core.env.annotation.Value;
+import org.hanframework.env.annotation.Profile;
+import org.hanframework.env.annotation.Value;
 import org.hanframework.tool.annotation.AnnotationTools;
 import org.hanframework.tool.reflection.ReflectionTools;
 

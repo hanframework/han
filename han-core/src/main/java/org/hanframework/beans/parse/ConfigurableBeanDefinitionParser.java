@@ -9,6 +9,7 @@ import org.hanframework.beans.annotation.Primary;
 import org.hanframework.beans.annotation.Scope;
 import org.hanframework.beans.beandefinition.ConfigurableBeanDefinition;
 import org.hanframework.beans.beandefinition.GenericBeanDefinition;
+import org.hanframework.beans.beandefinition.ValueHolderFactory;
 import org.hanframework.beans.beanfactory.ConfigurableBeanFactory;
 import org.hanframework.beans.parse.exception.BeanDefinitionParserException;
 import org.hanframework.tool.annotation.AnnotationTools;
@@ -43,7 +44,7 @@ public class ConfigurableBeanDefinitionParser extends AbstractCustomerBeanDefini
             //通用的放这里做，开发者能看到的都是他要关心的
             ConfigurableBeanDefinition configurableBeanDefinition = new GenericBeanDefinition();
             //如果设置实例化自定义的实例化
-            configurableBeanDefinition.setConfigurationBeanMethod(new ConfigurationBeanMethod(beanMethod, beanMethod.getParameters(), beanCls));
+            configurableBeanDefinition.setConfigurationBeanMethod(new ConfigurationBeanMethod(beanMethod, beanMethod.getParameters(), beanCls,ValueHolderFactory.valueHolder(beanMethod)));
             //从方法上读取注解
             ConfigurableDefinitionBuilder
                     .lifeCycleBuilder(configurableBeanDefinition, beanMethod.getDeclaredAnnotations());

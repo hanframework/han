@@ -3,13 +3,14 @@ package org.hanframework.beans;
 import org.hanframework.beans.beandefinition.ConstructorArgumentValues;
 import org.hanframework.beans.beandefinition.ConstructorMetadata;
 import org.hanframework.beans.beandefinition.ValueHolder;
+import org.hanframework.tool.annotation.AnnotationTools;
 import org.hanframework.tool.reflection.ClassTools;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.*;
 
 /**
  * @author liuxin
@@ -26,11 +27,13 @@ public class ConstructorBuilder {
             ConstructorArgumentValues cas = new ConstructorArgumentValues();
             String[] parameterNames = parameterNameDiscoverer.getParameterNames(constructor);
             Class[] parameterTypes = constructor.getParameterTypes();
+            Parameter[] parameters = constructor.getParameters();
             Annotation[][] parameterAnnotations = constructor.getParameterAnnotations();
             for (int i = 0; i < parameterNames.length; i++) {
                 String shortName = ClassTools.getShortName(parameterTypes[i]);
                 ValueHolder constructorArgumentValue = new ValueHolder(parameterTypes[i],
-                        i, parameterNames[i], shortName, Arrays.asList(parameterAnnotations[i]));
+                        i, parameterNames[i], shortName, Arrays.asList(parameterAnnotations[i]), parameters[i]);
+
                 cas.addConstructorArgumentValue(constructorArgumentValue);
             }
             ConstructorMetadata constructorInfo = new ConstructorMetadata();
@@ -41,4 +44,5 @@ public class ConstructorBuilder {
         }
         return !constructorInfoList.isEmpty() ? Optional.of(constructorInfoList) : Optional.empty();
     }
+
 }

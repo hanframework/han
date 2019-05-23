@@ -186,7 +186,7 @@ public abstract class AbstractBeanDefinition implements ConfigurableBeanDefiniti
 
     @Override
     @SuppressWarnings("unchecked")
-    public Constructor getDefaultConstructor() throws NoSuchMethodException {
+    public Constructor<?> getDefaultConstructor() throws NoSuchMethodException {
         return getOriginClass().getDeclaredConstructor();
     }
 

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.StringTokenizer;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,6 +60,7 @@ public final class StringTools {
     public static Boolean isEmpty(CharSequence cs) {
         return cs == null || cs.length() == 0;
     }
+
 
     /**
      * 判读是否是数字

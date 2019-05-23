@@ -1,6 +1,7 @@
 package org.hanframework.beans.beandefinition;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Parameter;
 import java.util.List;
 
 /**
@@ -9,6 +10,8 @@ import java.util.List;
  */
 
 public class ValueHolder {
+
+    private Parameter parameter;
     /**
      * 构造参数类型
      */
@@ -30,15 +33,21 @@ public class ValueHolder {
      */
     private List<Annotation> parameterAnnotations;
 
-    public ValueHolder(Class parameterType, int sort, String varName, String name, List<Annotation> parameterAnnotations) {
+
+    public ValueHolder(Class parameterType, int sort, String varName, String name, List<Annotation> parameterAnnotations, Parameter parameters) {
         this.parameterType = parameterType;
         this.sort = sort;
         this.varName = varName;
         this.name = name;
         this.parameterAnnotations = parameterAnnotations;
+        this.parameter = parameters;
     }
 
-    public Class getParameterType() {
+    public Parameter getOriginParameter() {
+        return parameter;
+    }
+
+    public Class<Object> getParameterType() {
         return parameterType;
     }
 

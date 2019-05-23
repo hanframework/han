@@ -1,5 +1,5 @@
 package org.hanframework.context.aware;
-import org.hanframework.core.env.Environment;
+import org.hanframework.env.Environment;
 
 /**
  * 注入环境
