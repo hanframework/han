@@ -50,10 +50,10 @@ public class ConditionFilterRegistry implements ConditionHandler {
     /**
      * 支持用户自定义
      *
-     * @param as
-     * @param cf
+     * @param as 条件注解
+     * @param cf 注解拦截条件
      */
-    public void register(Class<? extends Annotation> as, ConditionFilter cf) {
+    public void register(Class<? extends Annotation> as, AbstractConditionFilter cf) {
         checkAnnotation(as);
         beanConditionFilterMap.put(as, cf);
     }

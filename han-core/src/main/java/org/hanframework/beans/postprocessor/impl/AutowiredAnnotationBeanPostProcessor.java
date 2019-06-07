@@ -1,5 +1,6 @@
 package org.hanframework.beans.postprocessor.impl;
 
+import cn.hutool.core.collection.ConcurrentHashSet;
 import lombok.extern.slf4j.Slf4j;
 import org.hanframework.beans.exception.BeanCurrentlyInCreationException;
 import org.hanframework.beans.annotation.Autowired;
@@ -11,7 +12,6 @@ import org.hanframework.beans.exception.BeanCreationException;
 import org.hanframework.beans.postprocessor.InstantiationAwareBeanPostProcessor;
 import org.hanframework.beans.postprocessor.annotation.BeanProcessor;
 import org.hanframework.context.aware.BeanFactoryAware;
-import org.hanframework.env.annotation.Profile;
 import org.hanframework.env.annotation.Value;
 import org.hanframework.tool.annotation.AnnotationTools;
 import org.hanframework.tool.reflection.ReflectionTools;
@@ -42,16 +42,30 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
      * Value
      */
     private final Set<Class<? extends Annotation>> autowiredAnnotationTypes =
-            new LinkedHashSet();
+            new ConcurrentHashSet<>();
 
 
     private final Map<String, InjectionMetadata> injectionMetadataCache =
-            new ConcurrentHashMap(10);
+            new ConcurrentHashMap<>();
+
+    public final static int BEAN_TYPE = 0;
+
+    public final static int VALUE_TYPE = 1;
 
 
     public AutowiredAnnotationBeanPostProcessor() {
         this.autowiredAnnotationTypes.add(Autowired.class);
         this.autowiredAnnotationTypes.add(Value.class);
+    }
+
+    public int injectType(DependencyDescriptor dependencyDescriptor) {
+        if (AnnotationTools.isContainsAnnotation(dependencyDescriptor.getAnnotations(), Value.class)) {
+            return VALUE_TYPE;
+        }
+        if (AnnotationTools.isContainsAnnotation(dependencyDescriptor.getAnnotations(), Autowired.class, InsertBean.class)) {
+            return BEAN_TYPE;
+        }
+        return -1;
     }
 
     @Override
@@ -66,7 +80,7 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
 
     @Override
     public Optional<Object> postProcessAfterInitialization(Object existingBean, String beanName) {
-        return  Optional.ofNullable(existingBean);
+        return Optional.ofNullable(existingBean);
     }
 
     @Override
@@ -97,9 +111,9 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
     /**
      * 解析Bean中带有指定的#{autowiredAnnotationTypes}的属性
      *
-     * @param beanName
-     * @param clazz
-     * @return
+     * @param beanName bean名字
+     * @param clazz    类型
+     * @return 注入
      */
     private InjectionMetadata findAutowiringMetadata(String beanName, Class<?> clazz) {
         String cacheKey = (null != beanName) ? beanName : clazz.getName();
@@ -121,10 +135,10 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
      * 判断是否必须注入主要判断
      * required字段
      *
-     * @param memberObj
-     * @return
+     * @param memberObj 要注入类的属性
+     * @return 是否需要注入
      */
-    protected boolean determineRequiredStatus(Object memberObj) {
+    private boolean determineRequiredStatus(Object memberObj) {
         if (memberObj instanceof Field) {
             boolean containsAutowiredAnnotation = AnnotationTools.isContainsAnnotationFromField((Field) memberObj, Autowired.class);
             if (containsAutowiredAnnotation) {
@@ -158,15 +172,14 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
      * @return
      */
     private InjectionMetadata buildAutowiringMetadata(Class<?> clazz) {
-        LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList();
+        LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<>();
         Class<?> targetClass = clazz;
 
         do {
-            LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList();
+            LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<>();
             for (Field field : targetClass.getDeclaredFields()) {
                 //首先判断Field上是否有注入标志
-                boolean containsAnnotation = AnnotationTools.isContainsAnnotationFromField(field, autowiredAnnotationTypes);
-                if (containsAnnotation) {
+                if (AnnotationTools.isContainsAnnotationFromField(field, autowiredAnnotationTypes)) {
                     //带有static的不支持注入
                     if (Modifier.isStatic(field.getModifiers())) {
                         if (log.isWarnEnabled()) {
@@ -179,8 +192,7 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
                 }
             }
             for (Method method : targetClass.getDeclaredMethods()) {
-                boolean containsAnnotation = AnnotationTools.isContainsAnnotationFromMethod(method, autowiredAnnotationTypes);
-                if (containsAnnotation) {
+                if (AnnotationTools.isContainsAnnotationFromMethod(method, autowiredAnnotationTypes)) {
                     if (Modifier.isStatic(method.getModifiers())) {
                         if (log.isWarnEnabled()) {
                             log.warn("@Autowired 注解不支持静态方法: " + method);
@@ -200,35 +212,9 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
             targetClass = targetClass.getSuperclass();
         }
         while (targetClass != null && targetClass != Object.class);
-
         return new InjectionMetadata(clazz, elements);
     }
 
-
-    private Object resolvedCachedArgument(String beanName, Object cachedArgument) {
-        if (cachedArgument instanceof DependencyDescriptor) {
-            DependencyDescriptor descriptor = (DependencyDescriptor) cachedArgument;
-            return this.beanFactory.resolveDependency(descriptor, beanName, null, null);
-        } else {
-            return cachedArgument;
-        }
-    }
-
-
-    private Object getValueForProfile(Annotation[] annotations, Value value) {
-        Object result;
-        Profile profile = AnnotationTools.findAnnotation(Arrays.asList(annotations), Profile.class);
-        if (null != profile) {
-            for (String pro : profile.value()) {
-                result = beanFactory.getPropertyResolver().resolvePlaceholders(value.value(), pro);
-                if (null != result) {
-                    return result;
-                }
-            }
-        }
-        return beanFactory.getPropertyResolver().resolvePlaceholders(value.value());
-
-    }
 
     /**
      * 自动注入字段元素
@@ -247,48 +233,35 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
         }
 
         @Override
+        public void setCachedValue(Object... cachedValue) {
+            this.cachedFieldValue = cachedValue;
+            cached = cachedValue != null && cachedValue.length > 0;
+        }
+
+        @Override
         protected void inject(Object bean, String beanName) throws Throwable {
             Field field = (Field) this.member;
             try {
-                Object value = null;
-                if (this.cached) {
-                    value = resolvedCachedArgument(beanName, this.cachedFieldValue);
+                if (cached) {
+                    ReflectionTools.makeAccessible(field);
+                    field.set(bean, cachedFieldValue);
                 } else {
                     //将一个beanName依赖的bean给记录下来，给BeanFactory维护，当前先不实现。
-                    Set<String> autowiredBeanNames = new LinkedHashSet(1);
                     TypeConverter typeConverter = beanFactory.getTypeConverter();
-                    DependencyDescriptor desc = new DependencyDescriptor(field, this.required);
+                    DependencyDescriptor desc = new DependencyDescriptor(beanName, field, this.required);
                     desc.setContainingClass(bean.getClass());
-                    Annotation[] annotations = desc.getAnnotations();
-                    Value valueAnnotation = AnnotationTools.findAnnotation(Arrays.asList(annotations), Value.class);
-                    if (null != valueAnnotation) {
-                        value = getValueForProfile(annotations, valueAnnotation);
-                        value = typeConverter.convertIfNecessary(value, field.getType());
-                        if (null == value) {
-                            log.error(beanName + "注入失败,缺失依赖参数名:[" + valueAnnotation.value() + "]");
-                        }
-                    } else if (Modifier.isInterface(field.getType().getModifiers()) || Modifier.isAbstract(field.getType().getModifiers())) {
-                        String[] beanNamesForType = beanFactory.getBeanNamesForType(field.getType());
-                        if (beanNamesForType.length == 1) {
-                            value = beanFactory.getBean(beanNamesForType[0]);
-                        }
-                        if (null == value) {
-                            log.error(beanName + "注入失败,缺失依赖:[" + beanNamesForType[0] + "]");
-                        }
-                    } else {
-                        value = beanFactory.resolveDependency(desc, beanName, autowiredBeanNames, typeConverter);
-                        if (null == value) {
-                            log.error(beanName + "注入失败,缺失依赖:[" + desc.getDependencyName() + "]");
-                        }
+                    switch (injectType(desc)) {
+                        case AutowiredAnnotationBeanPostProcessor.BEAN_TYPE:
+                            setCachedValue(injectBean(beanFactory, desc, typeConverter, bean));
+                            break;
+                        case AutowiredAnnotationBeanPostProcessor.VALUE_TYPE:
+                            setCachedValue(injectValue(beanFactory, desc, typeConverter, bean));
+                            break;
+                        default:
+                            log.warn("no ject");
                     }
-                    //当发现value是空，但是
-                    if (value == null && !this.required) {
-                        value = null;
-                    }
-                }
-                if (value != null) {
-                    ReflectionTools.makeAccessible(field);
-                    field.set(bean, value);
+                    ReflectionTools.makeAccessible(desc.getField());
+                    desc.getField().set(bean, cachedFieldValue);
                 }
             } catch (BeanCurrentlyInCreationException bie) {
                 throw bie;
@@ -316,65 +289,49 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
         }
 
         @Override
+        public void setCachedValue(Object... cachedValue) {
+            this.cachedMethodArguments = cachedValue;
+            this.cached = cachedValue != null && cachedValue.length > 0;
+        }
+
+        @Override
         protected void inject(Object bean, String beanName) throws Throwable {
             Method method = (Method) this.member;
             try {
                 Object[] arguments;
                 if (this.cached) {
-                    // Shortcut for avoiding synchronization...
-                    arguments = resolveCachedArguments(beanName);
+                    ReflectionTools.makeAccessible(method);
+                    method.invoke(bean, cachedMethodArguments);
                 } else {
                     Class<?>[] paramTypes = method.getParameterTypes();
                     arguments = new Object[paramTypes.length];
-                    DependencyDescriptor[] descriptors = new DependencyDescriptor[paramTypes.length];
-                    Set<String> autowiredBeanNames = new LinkedHashSet<String>(paramTypes.length);
                     TypeConverter typeConverter = beanFactory.getTypeConverter();
                     for (int i = 0; i < arguments.length; i++) {
-                        MethodParameter methodParam = new MethodParameter(method, i);
-                        DependencyDescriptor desc = new DependencyDescriptor(methodParam, this.required);
+                        MethodParameter methodParameter = new MethodParameter(method, i);
+                        DependencyDescriptor desc = new DependencyDescriptor(beanName, methodParameter, this.required);
                         desc.setContainingClass(bean.getClass());
-                        descriptors[i] = desc;
-                        Annotation[] annotations = desc.getAnnotations();
-                        Value valueAnnotation = AnnotationTools.findAnnotation(Arrays.asList(annotations), Value.class);
-                        Object arg = null;
-                        if (null != valueAnnotation) {
-                            arg = getValueForProfile(annotations, valueAnnotation);
-                            arg = typeConverter.convertIfNecessary(arg, paramTypes[i]);
-                        } else if (Modifier.isInterface(paramTypes[i].getModifiers()) || Modifier.isAbstract(paramTypes[i].getModifiers())) {
-                            String[] beanNamesForType = beanFactory.getBeanNamesForType(paramTypes[i]);
-                            if (beanNamesForType.length == 1) {
-                                arg = beanFactory.getBean(beanNamesForType[0]);
-                            }
-                        } else {
-                            arg = beanFactory.resolveDependency(desc, beanName, autowiredBeanNames, typeConverter);
+                        switch (injectType(desc)) {
+                            case AutowiredAnnotationBeanPostProcessor.BEAN_TYPE:
+                                arguments[i] = injectBean(beanFactory, desc, typeConverter, bean);
+                                break;
+                            case AutowiredAnnotationBeanPostProcessor.VALUE_TYPE:
+                                arguments[i] = injectValue(beanFactory, desc, typeConverter, bean);
+                                break;
+                            default:
+                                log.warn("不执行注入");
                         }
-                        if (arg == null && !this.required) {
-                            arguments = null;
-                            break;
-                        }
-                        arguments[i] = arg;
                     }
+                    setCachedValue(arguments);
                 }
-                if (arguments != null) {
+                if (cachedMethodArguments != null) {
                     ReflectionTools.makeAccessible(method);
-                    method.invoke(bean, arguments);
+                    method.invoke(bean, cachedMethodArguments);
                 }
             } catch (InvocationTargetException ex) {
                 throw ex.getTargetException();
             } catch (Throwable ex) {
                 throw new BeanCreationException("不能自动注入方法: " + method, ex);
             }
-        }
-
-        private Object[] resolveCachedArguments(String beanName) {
-            if (this.cachedMethodArguments == null) {
-                return null;
-            }
-            Object[] arguments = new Object[this.cachedMethodArguments.length];
-            for (int i = 0; i < arguments.length; i++) {
-                arguments[i] = resolvedCachedArgument(beanName, this.cachedMethodArguments[i]);
-            }
-            return arguments;
         }
     }
 }

@@ -10,7 +10,7 @@ import org.hanframework.env.Configuration;
  * @author: liuxin
  * @date: 2017/11/17 下午11:52
  */
-public interface ApplicationContext extends ConfigurableApplicationContext {
+public interface ApplicationContext {
 
     /**
      * 根据名字获取bean实例

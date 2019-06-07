@@ -9,7 +9,6 @@ import org.hanframework.tool.annotation.AnnotationTools;
 import org.hanframework.tool.annotation.type.AnnotationMetadata;
 import org.hanframework.tool.asserts.Assert;
 import org.hanframework.tool.reflection.ClassTools;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -38,14 +37,17 @@ public abstract class AbstractBeanDefinition implements ConfigurableBeanDefiniti
 
     private String beanName;
 
-    public ObjectFactory customerInstantiationFactory;
+    private ObjectFactory customerInstantiationFactory;
 
-    public ConfigurationBeanMethod configurationBeanMethod;
+    private ConfigurationBeanMethod configurationBeanMethod;
 
     public boolean beforeInstantiationResolved = true;
 
     private List<ConstructorMetadata> constructorInfo;
 
+    public ObjectFactory getCustomerInstantiationFactory() {
+        return customerInstantiationFactory;
+    }
 
     public void setBeforeInstantiationResolved(boolean beforeInstantiationResolved) {
         this.beforeInstantiationResolved = beforeInstantiationResolved;

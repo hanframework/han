@@ -40,25 +40,33 @@ public class DependencyDescriptor {
 
     private transient Annotation[] fieldAnnotations;
 
+    private String declaringBeanName;
 
     /**
      * Create a new descriptor for a method or constructor parameter.
      * Considers the dependency as 'eager'.
+     *
+     * @param beanName        beanName
      * @param methodParameter the MethodParameter to wrap
-     * @param required whether the dependency is required
+     * @param required        whether the dependency is required
      */
-    public DependencyDescriptor(MethodParameter methodParameter, boolean required) {
-        this(methodParameter, required, true);
+    public DependencyDescriptor(String beanName, MethodParameter methodParameter, boolean required) {
+        this(methodParameter, required, true, beanName);
+    }
+
+    public String getDeclaringBeanName() {
+        return declaringBeanName;
     }
 
     /**
      * Create a new descriptor for a method or constructor parameter.
+     *
      * @param methodParameter the MethodParameter to wrap
-     * @param required whether the dependency is required
-     * @param eager whether this dependency is 'eager' in the sense of
-     * eagerly resolving potential target beans for type matching
+     * @param required        whether the dependency is required
+     * @param eager           whether this dependency is 'eager' in the sense of
+     *                        eagerly resolving potential target beans for type matching
      */
-    public DependencyDescriptor(MethodParameter methodParameter, boolean required, boolean eager) {
+    public DependencyDescriptor(MethodParameter methodParameter, boolean required, boolean eager, String beanName) {
         Assert.notNull(methodParameter, "MethodParameter must not be null");
         this.methodParameter = methodParameter;
         this.declaringClass = methodParameter.getDeclaringClass();
@@ -66,43 +74,47 @@ public class DependencyDescriptor {
         if (this.methodParameter.getMethod() != null) {
             this.methodName = methodParameter.getMethod().getName();
             this.parameterTypes = methodParameter.getMethod().getParameterTypes();
-        }
-        else {
+        } else {
             this.parameterTypes = methodParameter.getConstructor().getParameterTypes();
         }
         this.parameterIndex = methodParameter.getParameterIndex();
         this.required = required;
         this.eager = eager;
+        this.declaringBeanName = beanName;
     }
 
     /**
      * Create a new descriptor for a field.
      * Considers the dependency as 'eager'.
-     * @param field the field to wrap
+     *
+     * @param field    the field to wrap
      * @param required whether the dependency is required
      */
-    public DependencyDescriptor(Field field, boolean required) {
-        this(field, required, true);
+    public DependencyDescriptor(String beanName, Field field, boolean required) {
+        this(beanName, field, required, true);
     }
 
     /**
      * Create a new descriptor for a field.
-     * @param field the field to wrap
+     *
+     * @param field    the field to wrap
      * @param required whether the dependency is required
-     * @param eager whether this dependency is 'eager' in the sense of
-     * eagerly resolving potential target beans for type matching
+     * @param eager    whether this dependency is 'eager' in the sense of
+     *                 eagerly resolving potential target beans for type matching
      */
-    public DependencyDescriptor(Field field, boolean required, boolean eager) {
+    public DependencyDescriptor(String beanName, Field field, boolean required, boolean eager) {
         Assert.notNull(field, "Field must not be null");
         this.field = field;
         this.declaringClass = field.getDeclaringClass();
         this.fieldName = field.getName();
         this.required = required;
         this.eager = eager;
+        this.declaringBeanName = beanName;
     }
 
     /**
      * Copy constructor.
+     *
      * @param original the original descriptor to create a copy from
      */
     public DependencyDescriptor(DependencyDescriptor original) {
@@ -124,6 +136,7 @@ public class DependencyDescriptor {
     /**
      * Return the wrapped MethodParameter, if any.
      * <p>Note: Either MethodParameter or Field is available.
+     *
      * @return the MethodParameter, or {@code null} if none
      */
     public MethodParameter getMethodParameter() {
@@ -133,6 +146,7 @@ public class DependencyDescriptor {
     /**
      * Return the wrapped Field, if any.
      * <p>Note: Either MethodParameter or Field is available.
+     *
      * @return the Field, or {@code null} if none
      */
     public Field getField() {
@@ -160,6 +174,7 @@ public class DependencyDescriptor {
 
     /**
      * Increase this descriptor's nesting level.
+     *
      * @see MethodParameter#increaseNestingLevel()
      */
     public void increaseNestingLevel() {
@@ -168,7 +183,6 @@ public class DependencyDescriptor {
             this.methodParameter.increaseNestingLevel();
         }
     }
-
 
 
     /**
@@ -181,6 +195,7 @@ public class DependencyDescriptor {
 
     /**
      * Return a variant of this descriptor that is intended for a fallback match.
+     *
      * @see #fallbackMatchAllowed()
      */
     public DependencyDescriptor forFallbackMatch() {
@@ -206,6 +221,7 @@ public class DependencyDescriptor {
 
     /**
      * Determine the name of the wrapped parameter/field.
+     *
      * @return the declared name (never {@code null})
      */
     public String getDependencyName() {
@@ -214,6 +230,7 @@ public class DependencyDescriptor {
 
     /**
      * Determine the declared (non-generic) type of the wrapped parameter/field.
+     *
      * @return the declared type (never {@code null})
      */
     public Class<?> getDependencyType() {
@@ -225,8 +242,7 @@ public class DependencyDescriptor {
                     Type arg = args[args.length - 1];
                     if (arg instanceof Class) {
                         return (Class<?>) arg;
-                    }
-                    else if (arg instanceof ParameterizedType) {
+                    } else if (arg instanceof ParameterizedType) {
                         arg = ((ParameterizedType) arg).getRawType();
                         if (arg instanceof Class) {
                             return (Class<?>) arg;
@@ -234,12 +250,10 @@ public class DependencyDescriptor {
                     }
                 }
                 return Object.class;
-            }
-            else {
+            } else {
                 return this.field.getType();
             }
-        }
-        else {
+        } else {
             return this.methodParameter.getNestedParameterType();
         }
     }
@@ -254,8 +268,7 @@ public class DependencyDescriptor {
                 this.fieldAnnotations = this.field.getAnnotations();
             }
             return this.fieldAnnotations;
-        }
-        else {
+        } else {
             return this.methodParameter.getParameterAnnotations();
         }
     }
@@ -273,13 +286,11 @@ public class DependencyDescriptor {
         try {
             if (this.fieldName != null) {
                 this.field = this.declaringClass.getDeclaredField(this.fieldName);
-            }
-            else {
+            } else {
                 if (this.methodName != null) {
                     this.methodParameter = new MethodParameter(
                             this.declaringClass.getDeclaredMethod(this.methodName, this.parameterTypes), this.parameterIndex);
-                }
-                else {
+                } else {
                     this.methodParameter = new MethodParameter(
                             this.declaringClass.getDeclaredConstructor(this.parameterTypes), this.parameterIndex);
                 }
@@ -287,8 +298,7 @@ public class DependencyDescriptor {
                     this.methodParameter.increaseNestingLevel();
                 }
             }
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
             throw new IllegalStateException("Could not find original class structure", ex);
         }
     }

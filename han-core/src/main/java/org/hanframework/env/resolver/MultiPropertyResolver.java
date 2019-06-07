@@ -13,7 +13,7 @@ public interface MultiPropertyResolver extends PropertyResolver {
    *
    * @param text
    * @param profile 指定的环境
-   * @return
+   * @return string
    */
   String resolvePlaceholders(String text, String profile);
 
@@ -22,8 +22,8 @@ public interface MultiPropertyResolver extends PropertyResolver {
    *
    * @param text
    * @param profile 指定的环境
-   * @return
-   * @throws IllegalArgumentException
+   * @return string
+   * @throws IllegalArgumentException 类型异常
    */
   String resolveRequiredPlaceholders(String text, String profile) throws IllegalArgumentException;
 }

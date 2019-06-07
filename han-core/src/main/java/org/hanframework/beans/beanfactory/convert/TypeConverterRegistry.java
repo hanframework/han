@@ -54,7 +54,7 @@ public class TypeConverterRegistry implements TypeConverter {
      */
     public void addConvertPropertiesEditor(Class requiredType, PropertyConvertEditor propertyConvertEditor, boolean isReplace) {
         if (convertEditorMap.containsKey(requiredType) && isReplace) {
-            log.warn(requiredType + "编辑器替换");
+            log.warn(requiredType + "编辑器替换:" + convertEditorMap.get(requiredType));
             convertEditorMap.put(requiredType, propertyConvertEditor);
         }
     }

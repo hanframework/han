@@ -6,6 +6,7 @@ import org.hanframework.env.ConfigurableEnvironment;
  * @author liuxin
  * @version Id: EnvironmentLoadEvent.java, v 0.1 2018-12-11 14:09
  */
+@Deprecated
 public class EnvironmentLoadEvent extends ApplicationEvent<ConfigurableEnvironment> {
 
     private String[] args;

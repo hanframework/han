@@ -1,12 +1,12 @@
 package org.hanframework.web.handler;
 
-import lombok.extern.slf4j.Slf4j;
 import org.hanframework.beans.beandefinition.BeanDefinition;
 import org.hanframework.beans.beanfactory.lifecycle.InitializingBean;
 import org.hanframework.context.ApplicationContext;
 import org.hanframework.context.aware.ApplicationContextAware;
 import org.hanframework.tool.annotation.type.AnnotationMetadata;
-import org.hanframework.web.core.MappingRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -18,8 +18,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author liuxin
  * @version Id: AbstractHandlerMapping.java, v 0.1 2019-03-26 11:27
  */
-@Slf4j
 public abstract class AbstractHandlerMapping<T> implements ApplicationContextAware, InitializingBean {
+
+    protected final Logger log = LoggerFactory.getLogger(getClass());
 
     private ApplicationContext applicationContext;
 
@@ -37,7 +38,7 @@ public abstract class AbstractHandlerMapping<T> implements ApplicationContextAwa
     }
 
 
-    protected void initHandlerMethods() {
+    private void initHandlerMethods() {
         Map<String, BeanDefinition> beanDefinition = applicationContext.getBeanFactory().getBeanDefinition();
         for (Map.Entry<String, BeanDefinition> beanDefinitionEntry : beanDefinition.entrySet()) {
             String beanKey = beanDefinitionEntry.getKey();
@@ -66,7 +67,7 @@ public abstract class AbstractHandlerMapping<T> implements ApplicationContextAwa
      * 解析方法上路径生成URL
      *
      * @param method 被标记为HTTP处理方法的方法
-     * @return
+     * @return List
      */
     protected abstract List<URL> buildURL(Method method);
 
@@ -81,43 +82,54 @@ public abstract class AbstractHandlerMapping<T> implements ApplicationContextAwa
         return null;
     }
 
+    /**
+     * 根据URL获取绑定的方法
+     *
+     * @param url 路径地址
+     * @return HandlerMethod
+     */
     public abstract HandlerMethod getHandlerMethod(URL url);
 
 
     /**
      * 请求信息的封装
      *
-     * @param method
-     * @param <T>
-     * @return
+     * @param method 创建Mapping
+     * @return 泛型
      */
-    protected abstract <T> T createRequestMappingInfo(Method method);
+    protected abstract T createRequestMappingInfo(Method method);
 
     /**
      * 是否是控制器
      *
-     * @param annotationMetadata
-     * @return
+     * @param annotationMetadata 注解原始数据
+     * @return boolean
      */
     protected abstract boolean isHandler(AnnotationMetadata annotationMetadata);
 
     /**
      * 是否是控制方法
      *
-     * @param method
-     * @return
+     * @param method 方法
+     * @return boolean
      */
     protected abstract boolean isHandlerMethod(Method method);
 
     /**
      * 是否是websocket
      *
-     * @param method
-     * @return
+     * @param method 当前方法
+     * @return boolean
      */
     protected abstract boolean isWebSocket(Method method);
 
 
-
+    /**
+     * 将url与处理方法绑定
+     *
+     * @param handler 处理类
+     * @param method  当前方法
+     * @param url     路径
+     */
     protected abstract void registerHandlerMethod(Object handler, Method method, URL url);
 }

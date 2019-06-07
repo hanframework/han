@@ -184,7 +184,7 @@ public class AnnotationTools {
             Object o = null;
             try {
                 Method declaredMethod = annotation.annotationType().getDeclaredMethod(annotationKey);
-                o = declaredMethod.invoke(annotation, null);
+                o = declaredMethod.invoke(annotation, new Object[]{});
             } catch (Exception e) {
                 e.printStackTrace();
             }

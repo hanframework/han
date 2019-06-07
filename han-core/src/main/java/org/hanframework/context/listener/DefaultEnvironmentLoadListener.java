@@ -13,6 +13,7 @@ import java.util.Properties;
  * @author liuxin
  * @version Id: DefaultEnvironmentLoadListener.java, v 0.1 2018-12-12 14:45
  */
+@Deprecated
 public class DefaultEnvironmentLoadListener extends EnvironmentLoadListener {
 
     private final String CHARSET = "utf8";

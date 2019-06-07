@@ -14,16 +14,16 @@ public class StandardEnvironment extends AbstractEnvironment {
     /**
      * System environment property source name: {@value}
      */
-    public static final String SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME = "systemEnvironment";
+    private static final String SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME = "systemEnvironment";
 
     /**
      * JVM system properties property source name: {@value}
      */
-    public static final String SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME = "systemJvmProperties";
+    private static final String SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME = "systemJvmProperties";
 
     @Override
     protected void customizePropertySources(MutablePropertySources propertySources) {
-        propertySources.add(new CommonProperty(SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, getSystemProperties()));
+        propertySources.add(new CommonProperty(SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME, getJvmProperties()));
         propertySources.add(new CommonProperty(SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, getSystemEnvironment()));
     }
 

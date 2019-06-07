@@ -16,18 +16,25 @@ public class DefaultBeanNameGenerator implements BeanNameGenerator {
     /**
      * 默认就是首字母小写
      * 如果是FactoryBean就在前面加$
-     * @param definition
-     * @return
+     *
+     * @param definition bean描述
+     * @return bean名字
      */
     @Override
     public String generateBeanName(BeanDefinition definition) {
         String beanName = definition.getBeanName();
-        return StringTools.isEmpty(beanName)?generateBeanName(definition.getOriginClass()):beanName;
+        return StringTools.isEmpty(beanName) ? generateBeanName(definition.getOriginClass()) : beanName;
     }
 
+    /**
+     * 生成Bean名字
+     *
+     * @param beanType bean类型
+     * @return bean名字
+     */
     @Override
-    public String generateBeanName(Class beanClass) {
-        boolean factoryBean = FactoryBean.class.isAssignableFrom(beanClass);
-        return factoryBean? BeanFactory.FACTORY_BEAN_PREFIX+ StringTools.uncapitalize(ClassTools.getShortName(beanClass)):StringTools.uncapitalize(ClassTools.getShortName(beanClass));
+    public String generateBeanName(Class beanType) {
+        boolean factoryBean = FactoryBean.class.isAssignableFrom(beanType);
+        return factoryBean ? BeanFactory.FACTORY_BEAN_PREFIX + StringTools.uncapitalize(ClassTools.getShortName(beanType)) : StringTools.uncapitalize(ClassTools.getShortName(beanType));
     }
 }

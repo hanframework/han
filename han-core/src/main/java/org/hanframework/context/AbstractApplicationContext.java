@@ -2,6 +2,7 @@ package org.hanframework.context;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hanframework.env.ConfigurableEnvironment;
+import org.hanframework.env.Environment;
 import org.hanframework.env.StandardEnvironment;
 import org.hanframework.tool.app.ApplicationPid;
 import org.hanframework.beans.beandefinition.BeanDefinition;
@@ -15,12 +16,12 @@ import org.hanframework.beans.postprocessor.CommonAnnotationBeanPostProcessor;
 import org.hanframework.beans.postprocessor.impl.ApplicationContextAwareProcessor;
 import org.hanframework.beans.postprocessor.impl.AutowiredAnnotationBeanPostProcessor;
 import org.hanframework.context.listener.ApplicationListener;
-import org.hanframework.context.listener.DefaultEnvironmentLoadListener;
-import org.hanframework.context.listener.event.EnvironmentLoadEvent;
 import org.hanframework.env.Configuration;
 import org.hanframework.env.postprocessor.EnvironmentPostProcessor;
 import org.hanframework.tool.asserts.Assert;
 import org.hanframework.tool.date.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,13 +30,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author liuxin
  * @version Id: AbstractSmileApplicationContext.java, v 0.1 2018/10/10 5:48 PM
  */
-@Slf4j
-public abstract class AbstractApplicationContext implements ApplicationContext {
+public abstract class AbstractApplicationContext implements ConfigurableApplicationContext {
 
-    /**
-     * 启动时间
-     */
-    private long startTime;
+    private final Logger log = LoggerFactory.getLogger(getClass());
     /**
      * 系统启动标识
      */
@@ -58,13 +55,15 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
      * 监听器
      */
     private final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
+
+    private Configuration configuration = null;
     /**
      * 构造程序,在程序运行结束后执行
      */
     private Thread shutdownHook;
 
 
-    public List<BeanFactoryPostProcessor> getBeanFactoryPostProcessors() {
+    private List<BeanFactoryPostProcessor> getBeanFactoryPostProcessors() {
         return beanFactoryPostProcessors;
     }
 
@@ -77,35 +76,37 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
     /**
      * 运行扩展类获取bean的副本信息
      *
-     * @return
+     * @return Map
      */
     @Override
     public Map<String, BeanDefinition> getBeanBeanDefinitionMap() {
         return getBeanFactory().getBeanDefinition();
     }
 
+
     /**
      * 处理可配置的信息
+     * 解析策略,args参数。扫描目录
      *
-     * @param args
-     * @return
+     * @param envParseContext 参数信息
      */
-    public void prepareEnvironment(String[] args) {
-        //生层一个环境加载时间
-        EnvironmentLoadEvent loadEvent = new EnvironmentLoadEvent(getConfigurableEnvironment(), args);
-        new DefaultEnvironmentLoadListener().onApplicationEvent(loadEvent);
+    public void prepareEnvironment(EnvParseContext envParseContext) {
+        new LoadEnvParseContext(envParseContext, (ConfigurableEnvironment) getEnvironment()).load();
     }
 
-
     @Override
-    public ConfigurableEnvironment getConfigurableEnvironment() {
+    public Environment getEnvironment() {
         if (this.configurableEnvironment == null) {
             this.configurableEnvironment = this.createEnvironment();
         }
-
         return this.configurableEnvironment;
     }
 
+    /**
+     * 创建工厂,是容器的核心功能,留给子类去实现,定制。
+     *
+     * @return bean工厂
+     */
     @Override
     public abstract ConfigurableBeanFactory getBeanFactory();
 
@@ -113,18 +114,18 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
     /**
      * 对BeanFactory做一些预处理操作，设置需要的解析器等
      *
-     * @param beanFactory
+     * @param beanFactory bean工厂
      */
-    protected void prepareBeanFactory(ConfigurableBeanFactory beanFactory) {
+    private void prepareBeanFactory(ConfigurableBeanFactory beanFactory) {
         //注入环境配置
-        beanFactory.setPropertyResolver(getConfigurableEnvironment());
+        beanFactory.setPropertyResolver(getEnvironment());
         //注入全局的配置信息
         Configuration configuration = getConfiguration();
         beanFactory.setConfiguration(configuration);
     }
 
 
-    protected void invokerEnvironmentPostProcessors(ConfigurableBeanFactory configurableBeanFactory, ConfigurableEnvironment configurableEnvironment) {
+    private void invokerEnvironmentPostProcessors(ConfigurableBeanFactory configurableBeanFactory, ConfigurableEnvironment configurableEnvironment) {
         DefaultListableBeanFactory listableBeanFactory = (DefaultListableBeanFactory) configurableBeanFactory;
         //从IOC容器中根据类型获取到的处理器
         //留给用户对配置文件修改的机会
@@ -138,9 +139,9 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
     /**
      * 给开发者最后一次修改BeanFactory的机会
      *
-     * @param configurableBeanFactory
+     * @param configurableBeanFactory bean工厂
      */
-    protected void invokeBeanFactoryPostProcessors(ConfigurableBeanFactory configurableBeanFactory) {
+    private void invokeBeanFactoryPostProcessors(ConfigurableBeanFactory configurableBeanFactory) {
         //容器初始化就配置好的处理器
         List<BeanFactoryPostProcessor> beanFactoryPostProcessors = getBeanFactoryPostProcessors();
         DefaultListableBeanFactory listableBeanFactory = (DefaultListableBeanFactory) getBeanFactory();
@@ -165,9 +166,9 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
      * 从当前的BeanDefinition中找到BeanPostProcessor的名字，然后添加到
      * 内置的处理器
      *
-     * @param configurableBeanFactory
+     * @param configurableBeanFactory bean工厂
      */
-    protected void registerBeanPostProcessors(ConfigurableBeanFactory configurableBeanFactory) {
+    private void registerBeanPostProcessors(ConfigurableBeanFactory configurableBeanFactory) {
         //---------------------内置处理器-----------------------
         //内置自动注入转换器
         configurableBeanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this, configurableBeanFactory));
@@ -190,7 +191,7 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
     /**
      * 注册监听器
      */
-    protected void registerListeners() {
+    private void registerListeners() {
         String[] listenerNames = ((DefaultListableBeanFactory) getBeanFactory()).getBeanNamesForType(ApplicationListener.class);
         for (String listenerName : listenerNames) {
             getApplicationListeners().add((ApplicationListener) getBean(listenerName));
@@ -210,14 +211,13 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
     /**
      * 保存系统的当前运行状态和启动时间
      */
-    protected void prepareRefresh() {
+    private void prepareRefresh() {
         //记录容器加载的开始时间,最后可统计是否时间差
-        this.startTime = System.currentTimeMillis();
         //保存当前上下文的运行状态
         this.closed.set(false);
         this.active.set(true);
         if (log.isInfoEnabled()) {
-            log.info("Refreshing " + this);
+            log.info("Start or Refreshing initializing the container");
         }
     }
 
@@ -236,39 +236,56 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
         stopWatch.start("Prepare Refresh Application");
         prepareRefresh();
         stopWatch.stop();
-        log.info("Current system system pid:[ " + new ApplicationPid() + " ]");
+
+        log.info("Current system pid:[ " + new ApplicationPid() + " ]");
         //创建一个BeanFactory以后的操作都围绕这个来。
         stopWatch.start("Create BeanFactory");
         ConfigurableBeanFactory beanFactory = getBeanFactory();
         stopWatch.stop();
+
+
         //预处理设置某些解析器等等
         stopWatch.start("Prepare BeanFactory");
         prepareBeanFactory(beanFactory);
         stopWatch.stop();
+
+
         //加载bean信息生成BeanDefinition。
         stopWatch.start("Load BeanDefinition");
         loadBeanDefinition(beanFactory);
         stopWatch.stop();
+
+
         //执行配置环境处理器
         stopWatch.start("Invoker EnvironmentPostProcessors");
         invokerEnvironmentPostProcessors(beanFactory, configurableEnvironment);
         stopWatch.stop();
+
+
         //给开发者最后一次修改BeanFactory的机会,可以在此种添加些addBeanPostProcessor
         stopWatch.start("Invoker BeanFactoryPostProcessors");
         invokeBeanFactoryPostProcessors(beanFactory);
         stopWatch.stop();
+
+
         //注册Bean 前后处理器,这些解析器对最终生成Bean有很大作用
         stopWatch.start("Register BeanPostProcessors");
         registerBeanPostProcessors(beanFactory);
         stopWatch.stop();
+
+
         //注册监听器
         stopWatch.start("Register Listeners");
         registerListeners();
         stopWatch.stop();
+
+
         //BeanFactory初始化，对单例进行提前处理
         stopWatch.start("Finish No-Lazy Bean Initialization");
         finishBeanFactoryInitialization(beanFactory);
         stopWatch.stop();
+
+
         //最后要做的事情
         stopWatch.start("Finish Refresh Application");
         finishRefresh();
@@ -279,7 +296,14 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
 
     @Override
     public Configuration getConfiguration() {
-        return new Configuration(this);
+        if (active.get() && null != configuration) {
+            return configuration;
+        }
+        if (closed.get()) {
+            refresh();
+        }
+        configuration = new Configuration(this);
+        return configuration;
     }
 
     private void doClose() {
@@ -305,7 +329,7 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
      *
      * @param beanFactory BeanFactory
      */
-    protected void finishBeanFactoryInitialization(ConfigurableBeanFactory beanFactory) {
+    private void finishBeanFactoryInitialization(ConfigurableBeanFactory beanFactory) {
         beanFactory.preInstantiateSingletons();
     }
 
@@ -323,18 +347,8 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
         this.applicationListeners.add(listener);
     }
 
-    public Set<ApplicationListener<?>> getApplicationListeners() {
+    private Set<ApplicationListener<?>> getApplicationListeners() {
         return applicationListeners;
-    }
-
-
-    private void setStartupDate(long startupDate) {
-        this.startTime = startupDate;
-    }
-
-
-    private long getStartupDate() {
-        return startTime;
     }
 
 

@@ -16,7 +16,6 @@ public class AbstractApplicationContextTest {
     public void applicationTest() {
         AnnotationConfigApplicationContext app = new AnnotationConfigApplicationContext(AbstractApplicationContextTest.class);
         app.run();
-        while (true) ;
     }
 
 

@@ -1,6 +1,5 @@
 package org.hanframework.beans.beanfactory.impl;
 
-import lombok.extern.slf4j.Slf4j;
 import org.hanframework.beans.BeanTools;
 import org.hanframework.beans.annotation.Autowired;
 import org.hanframework.beans.beandefinition.*;
@@ -17,16 +16,19 @@ import org.hanframework.env.annotation.Profile;
 import org.hanframework.env.annotation.Value;
 import org.hanframework.tool.annotation.AnnotationTools;
 import org.hanframework.tool.annotation.type.AnnotationMetadata;
+import org.hanframework.tool.function.FunctionTools;
 import org.hanframework.tool.reflection.MethodTools;
 import org.hanframework.tool.reflection.ReflectionTools;
 import org.hanframework.tool.string.StringTools;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -35,8 +37,9 @@ import java.util.stream.Stream;
  * @author liuxin
  * @version Id: AbstractAutowireCapableBeanFactory.java, v 0.1 2018/10/18 8:41 PM
  */
-@Slf4j
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
+
+    protected final Logger log = LoggerFactory.getLogger(getClass());
 
     private static final Object NULL = null;
 
@@ -83,14 +86,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
     private boolean conditionForBean(final String beanName, final GenericBeanDefinition mbd) {
-        boolean condition;
         try {
-            condition = getConditionHandler().isCondition(mbd);
+            return getConditionHandler().isCondition(mbd);
         } catch (BeanCreateConditionException ce) {
-            logger.error(beanName + ce.getMessage());
-            condition = false;
+            if (logger.isErrorEnabled()) {
+                logger.error(beanName + ce.getMessage());
+            }
+            return false;
         }
-        return condition;
     }
 
     private Object doCreateBean(final String beanName, final GenericBeanDefinition mbd, final Object[] args, boolean checked) {
@@ -100,13 +103,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             Object instanceBean;
             try {
                 if (mbd.isCustomerInstantiation()) {
-                    instanceBean = mbd.customerInstantiationFactory.getObject();
+                    instanceBean = mbd.getCustomerInstantiationFactory().getObject();
                 } else {
                     instanceBean = createBeanInstance(beanName, mbd, args);
                     //加入到单例中
-                    //实例化后处理器，然后填充
-                    this.populateBean(beanName, instanceBean);
                 }
+                //实例化后处理器，然后填充
+                this.populateBean(beanName, instanceBean);
                 //执行初始化
                 return initializeBean(instanceBean, beanName, mbd);
             } catch (Exception e) {
@@ -184,11 +187,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     private Object autowireConfigurationBeanMethod(final String beanName, final GenericBeanDefinition mbd) {
         ConfigurationBeanMethod configurationBeanMethod = mbd.getConfigurationBeanMethod();
         List<ValueHolder> valueHolders = configurationBeanMethod.getValueHolders();
-        Object[] args = argsForType(valueHolders);
+        Object[] args = FunctionTools.collectMapArray(valueHolders, this::argForType);
         conditionForBean(beanName, mbd);
         Object parentBean = getBean(configurationBeanMethod.getParentBeanCls());
         return configurationBeanMethod.invoke(parentBean, args);
-
     }
 
     /**
@@ -212,7 +214,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             if (AnnotationTools.isContainsAnnotation(declaredAnnotations, Autowired.class)) {
                 ConstructorArgumentValues constructorArguments = constructorInfo.getConstructorArguments();
                 List<ValueHolder> argumentValues = constructorArguments.getConstructorArgumentValues();
-                args = argsForType(argumentValues);
+                args = FunctionTools.collectMapArray(argumentValues, this::argForType);
                 constructorInvokeOpt = Optional.ofNullable(constructorInfo.getOriginalConstructor());
                 break;
             }
@@ -230,15 +232,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
 
-    private Object[] argsForType(List<ValueHolder> valueHolders) {
-        Object[] args = new Object[valueHolders.size()];
-        for (int i = 0; i < valueHolders.size(); i++) {
-            ValueHolder valueHolder = valueHolders.get(i);
-            args[valueHolder.getSort()] = argForType(valueHolder);
-        }
-        return args;
-    }
-
     /**
      * @param valueHolder 注入值工具类
      * @return 从容器中找到的类型值
@@ -253,7 +246,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         } else if (annotationMetadata.hasAnnotation(Autowired.class)) {
             Autowired autowired = annotationMetadata.getAnnotation(Autowired.class);
             String beanName = autowired.beanName();
-            Object result = getOr(StringTools.isEmpty(beanName), () -> resolveDependency(type), () -> resolveDependency(beanName));
+            Object result = FunctionTools.chooseSupplier(StringTools.isEmpty(beanName), () -> resolveDependency(type), () -> resolveDependency(beanName));
             if (autowired.required()) {
                 Optional.ofNullable(result).orElseThrow(BeanInjectException::new);
             }
@@ -261,10 +254,6 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
         throw new BeanInjectException();
 
-    }
-
-    private <T> T getOr(boolean flag, Supplier<T> trueResult, Supplier<T> falseResult) {
-        return flag ? trueResult.get() : falseResult.get();
     }
 
     /**
@@ -379,7 +368,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         for (BeanPostProcessor beanProcessor : getBeanPostProcessors()) {
             if (result.isPresent()) {
                 result = beanProcessor.postProcessBeforeInitialization(result.get(), beanName);
-                if (result.isPresent()) {
+                if (!result.isPresent()) {
                     return result;
                 }
             }

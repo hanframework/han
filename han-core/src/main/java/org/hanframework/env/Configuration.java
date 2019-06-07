@@ -6,7 +6,6 @@ import org.hanframework.beans.beanfactory.convert.TypeConverterRegistry;
 import org.hanframework.beans.condition.ConditionFilterRegistry;
 import org.hanframework.context.ApplicationContext;
 import org.hanframework.env.resolver.MultiPropertyResolver;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +43,7 @@ public final class Configuration {
         beanFactory.setConfiguration(this);
         //类型转换器工厂创建
         typeConverterRegistry = new TypeConverterRegistry();
-        this.multiPropertyResolver = applicationContext.getConfigurableEnvironment();
+        this.multiPropertyResolver = beanFactory.getConfiguration().getMultiPropertyResolver();
     }
 
 

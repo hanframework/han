@@ -13,11 +13,11 @@ public class User {
 
     @PostConstruct
     public void init() {
-        System.out.println("init...");
+        System.err.println("init...");
     }
 
     @PreDestroy
     public void destory(){
-        System.out.println("destory...");
+        System.err.println("destory...");
     }
 }

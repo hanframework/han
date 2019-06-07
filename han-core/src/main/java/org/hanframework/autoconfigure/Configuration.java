@@ -3,7 +3,6 @@ package org.hanframework.autoconfigure;
 import org.hanframework.beans.annotation.HanComponent;
 import org.hanframework.beans.beanfactory.impl.AbstractAutowireCapableBeanFactory;
 import org.hanframework.beans.parse.ConfigurableBeanDefinitionParser;
-
 import java.lang.annotation.*;
 
 /**

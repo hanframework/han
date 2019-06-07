@@ -14,7 +14,7 @@ public class BeanFactoryTools {
      * 判断是否是FactoryBean类
      *
      * @param name bean名字
-     * @return
+     * @return 是否factoryBean
      */
     public static boolean isFactoryDereference(String name) {
         return (name != null && name.startsWith(BeanFactory.FACTORY_BEAN_PREFIX));

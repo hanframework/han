@@ -6,6 +6,7 @@ import lombok.ToString;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -13,7 +14,6 @@ import java.util.regex.Pattern;
  * @author liuxin
  * @version Id: URL.java, v 0.1 2019-04-01 11:04
  */
-@ToString(exclude = {"compile"})
 public class URL {
 
     private static final String REGEX_PREFIX = "${";
@@ -158,5 +158,23 @@ public class URL {
                 ", variable=" + variable +
                 ", variableIndexMap=" + variableIndexMap +
                 '}';
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        URL url = (URL) o;
+        return variable == url.variable &&
+                Objects.equals(compile, url.compile) &&
+                protocol.equals(url.protocol) &&
+                path.equals(url.path) &&
+                variableIndexMap.equals(url.variableIndexMap);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(protocol, path, variable, variableIndexMap);
     }
 }

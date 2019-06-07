@@ -1,10 +1,12 @@
 package org.hanframework.beans.beanfactory;
 
 /**
- * @Package: pig.boot.bean
- * @Description: bean 工厂定义在BeanFactory里只对IOC容器的基本行为作了定义，根本不关心你的bean是如何定义怎样加载的。正如我们只关心工厂里得到什么的产品对象，至于工厂是怎么生产这些对象的，这个基本的接口不关心。
- * @author: liuxin
- * @date: 2017/9/15 下午2:05
+ * bean 工厂定义在BeanFactory里只对IOC容器的基本行为作了定义，
+ * 根本不关心你的bean是如何定义怎样加载的。正如我们只关心工厂里得到什么的产品对象，
+ * 至于工厂是怎么生产这些对象的，这个基本的接口不关心。
+ *
+ * @author liuxin
+ * @date 2017/9/15 下午2:05
  */
 public interface BeanFactory {
     /**
@@ -59,16 +61,16 @@ public interface BeanFactory {
     /**
      * 判断是否是原型模式
      *
-     * @param name
-     * @return
+     * @param name bean名字
+     * @return 是否原型
      */
     boolean isPrototype(String name);
 
     /**
      * 得到bean实例的Class类型
      *
-     * @param name
-     * @return
+     * @param name 是否单例
+     * @return bean类型
      */
     Class getType(String name);
 

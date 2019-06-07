@@ -5,6 +5,7 @@ import org.hanframework.beans.condition.ConditionHandler;
 import org.hanframework.beans.postprocessor.BeanPostProcessor;
 import org.hanframework.env.Configuration;
 import org.hanframework.env.resolver.MultiPropertyResolver;
+
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +44,7 @@ public interface ConfigurableBeanFactory extends SingletonBeanRegistry {
     /**
      * 获取处理器个数
      *
-     * @return
+     * @return int
      */
     int getBeanPostProcessorCount();
 
@@ -51,16 +52,16 @@ public interface ConfigurableBeanFactory extends SingletonBeanRegistry {
     /**
      * 判断是否是FactoryBean
      *
-     * @param name
-     * @return
+     * @param name bean名字
+     * @return boolean
      */
     boolean isFactoryBean(String name);
 
     /**
      * 判断是否循环依赖
      *
-     * @param beanName
-     * @return
+     * @param beanName bean名字
+     * @return boolean
      */
     boolean isCurrentlyInCreation(String beanName);
 
@@ -74,26 +75,37 @@ public interface ConfigurableBeanFactory extends SingletonBeanRegistry {
     /**
      * 配置类
      *
-     * @param configuration
+     * @param configuration 全局配置
      */
     void setConfiguration(final Configuration configuration);
 
+    /**
+     * 全局配置类
+     * @return Configuration
+     */
     Configuration getConfiguration();
 
+    /**
+     * BeanDefinition集合
+     * @return Map
+     */
     Map<String, BeanDefinition> getBeanDefinition();
+
     /**
      * 单例提前处理
      */
     void preInstantiateSingletons();
+
     /**
      * 销毁单例的对象
      */
     @Override
     void destroySingletons();
+
     /**
      * Bean条件处理器
      *
-     * @return
+     * @return 条件处理器
      */
     ConditionHandler getConditionHandler();
 

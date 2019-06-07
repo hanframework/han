@@ -21,6 +21,7 @@ import org.hanframework.beans.postprocessor.InstantiationAwareBeanPostProcessor;
 import org.hanframework.env.Configuration;
 import org.hanframework.env.resolver.MultiPropertyResolver;
 import org.hanframework.tool.asserts.Assert;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -382,7 +383,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Be
         while (iterator.hasNext()) {
             Map.Entry<String, BeanDefinition> next = iterator.next();
             String beanName = next.getKey();
-            BeanDefinition bd =  next.getValue();
+            BeanDefinition bd = next.getValue();
             if (bd.isSingleton() && bd.isLazy() && !bd.isAbstract()) {
                 getBean(beanName);
             }
@@ -396,7 +397,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Be
         while (iterator.hasNext()) {
             Map.Entry<String, BeanDefinition> next = iterator.next();
             String beanName = next.getKey();
-            BeanDefinition bd =  next.getValue();
+            BeanDefinition bd = next.getValue();
             String destroyMethodName = bd.getDestroyMethodName();
             if (bd.isSingleton() && bd.isLazy() && !bd.isAbstract()) {
                 Object singleton = getSingleton(beanName);

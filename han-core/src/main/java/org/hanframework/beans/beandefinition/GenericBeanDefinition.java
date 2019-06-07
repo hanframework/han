@@ -12,7 +12,7 @@ public class GenericBeanDefinition extends AbstractBeanDefinition {
      * @return true:根据配置类生成
      */
     public boolean isBeanMethodInstantiation() {
-        return super.configurationBeanMethod != null;
+        return getConfigurationBeanMethod() != null;
     }
 
     /**

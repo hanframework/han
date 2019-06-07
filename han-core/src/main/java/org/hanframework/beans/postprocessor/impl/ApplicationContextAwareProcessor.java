@@ -7,6 +7,7 @@ import org.hanframework.beans.beanfactory.BeanFactory;
 import org.hanframework.context.aware.*;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * 系统内置的处理器
@@ -22,9 +23,6 @@ public class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
     private ConfigurableBeanFactory beanFactory;
 
-    /**
-     * Create a new ApplicationContextAwareProcessor for the given context.
-     */
     public ApplicationContextAwareProcessor(AbstractApplicationContext applicationContext, ConfigurableBeanFactory beanFactory) {
         this.applicationContext = applicationContext;
         this.beanFactory = beanFactory;
@@ -39,9 +37,7 @@ public class ApplicationContextAwareProcessor implements BeanPostProcessor {
     @Override
     public Optional<Object> postProcessBeforeInitialization(Object bean, String beanName) {
         Optional<Object> beanOptional = Optional.ofNullable(bean);
-        if (beanOptional.isPresent()) {
-            invokeAwareInterfaces(beanOptional.get(), beanName);
-        }
+        beanOptional.ifPresent(x -> invokeAwareInterfaces(x, beanName));
         return beanOptional;
     }
 
@@ -54,7 +50,7 @@ public class ApplicationContextAwareProcessor implements BeanPostProcessor {
     private void invokeAwareInterfaces(Object bean, String beanName) {
         if (bean instanceof Aware) {
             if (bean instanceof EnvironmentAware) {
-                ((EnvironmentAware) bean).setEnvironment(this.applicationContext.getConfigurableEnvironment());
+                ((EnvironmentAware) bean).setEnvironment(this.applicationContext.getEnvironment());
             }
             if (bean instanceof ApplicationContextAware) {
                 ((ApplicationContextAware) bean).setApplicationContext(this.applicationContext);

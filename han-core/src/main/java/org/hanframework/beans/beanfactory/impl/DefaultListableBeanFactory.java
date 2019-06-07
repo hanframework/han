@@ -9,6 +9,7 @@ import org.hanframework.beans.beandefinition.GenericBeanDefinition;
 import org.hanframework.beans.beanfactory.ListableBeanFactory;
 import org.hanframework.beans.beanfactory.NoSuchBeanException;
 import org.hanframework.beans.beanfactory.convert.TypeConverter;
+import org.hanframework.beans.exception.BeanInjectException;
 import org.hanframework.beans.factorybean.FactoryBean;
 import org.hanframework.beans.postprocessor.impl.DependencyDescriptor;
 import org.hanframework.tool.asserts.Assert;
@@ -33,12 +34,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
      */
     private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<String, BeanDefinition>(64);
 
-    /**
-     * 实现BeanDefinitionRegistry相关方法
-     */
+
     //---------------------------------------------------------------------
     // Implementation of BeanDefinitionRegistry interface
     //---------------------------------------------------------------------
+
     @Override
     public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
         log.debug("registerBeanDefinition:{}", beanName);
@@ -70,8 +70,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
     @Override
     public String[] getBeanDefinitionNames() {
-        String[] strings = this.beanDefinitionMap.keySet().toArray(new String[]{});
-        return strings;
+        return this.beanDefinitionMap.keySet().toArray(new String[]{});
     }
 
     @Override
@@ -79,6 +78,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         return this.beanDefinitionMap.size();
     }
 
+
+    //---------------------------------------------------------------------
+    // Implementation of BeanFactory interface
+    //---------------------------------------------------------------------
 
     /**
      * 实现Bean工厂相关的接口方法
@@ -108,7 +111,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         if (primaryBeanNames.size() == 1) {
             return (T) getBean(primaryBeanNames.get(0));
         } else {
-            throw new NoSuchBeanException("NoSuchBean:" + Arrays.asList(primaryBeanNames).toString());
+            throw new NoSuchBeanException("NoSuchBean:" + primaryBeanNames);
         }
     }
 
@@ -127,17 +130,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     }
 
     /**
-     * @param descriptor
-     * @param requestBeanName    可以根据请求的BeanName找到BeanDefinition
-     * @param autowiredBeanNames 自动注入的beanName
-     * @param typeConverter
-     * @return
+     * @param descriptor    描述
+     * @param typeConverter 类型转换
+     * @return bean实例
      */
     @Override
-    public Object resolveDependency(DependencyDescriptor descriptor, String requestBeanName,
-                                    Set<String> autowiredBeanNames, TypeConverter typeConverter) {
+    public Object resolveDependency(DependencyDescriptor descriptor, TypeConverter typeConverter) {
         Class<?> dependencyType = descriptor.getDependencyType();
-        return getBean(beanNameGenerator.generateBeanName(dependencyType));
+        String beanName = beanNameGenerator.generateBeanName(dependencyType);
+        Object bean = getBean(beanName);
+        if (descriptor.isRequired() && null == bean) {
+            throw new BeanInjectException(String.format("beanType:%s,beanName:%s", dependencyType, beanName));
+        }
+        if (null != bean) {
+            typeConverter.convertIfNecessary(bean, dependencyType);
+        }
+        return bean;
     }
 
 
@@ -149,7 +157,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
      * 但是当一个类型的接口或者抽象类，找到了多个BeanName,此时就不能正常注入,因为IOC容器并不知道你要注入那个
      * 这个时候你就要根据BeanName来指定注入了
      *
-     * @param beanCls
+     * @param beanCls bean类型
      * @return
      */
     @Override
@@ -176,7 +184,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     /**
      * 返回一个副本,防止被外包恶意修改
      *
-     * @return
+     * @return map
      */
     @Override
     public Map<String, BeanDefinition> getBeanDefinition() {

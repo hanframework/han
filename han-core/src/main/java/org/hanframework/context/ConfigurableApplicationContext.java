@@ -4,6 +4,7 @@ import org.hanframework.beans.beandefinition.BeanDefinition;
 import org.hanframework.beans.beanfactory.postprocessor.BeanFactoryPostProcessor;
 import org.hanframework.context.listener.ApplicationListener;
 import org.hanframework.env.ConfigurableEnvironment;
+import org.hanframework.env.Environment;
 
 import java.util.Map;
 
@@ -13,14 +14,14 @@ import java.util.Map;
  * @author: liuxin
  * @date: 2017/12/6 下午6:01
  */
-public interface ConfigurableApplicationContext {
+public interface ConfigurableApplicationContext extends ApplicationContext{
 
     /**
      * 获取可配置的
      *
      * @return
      */
-    ConfigurableEnvironment getConfigurableEnvironment();
+    Environment getEnvironment();
 
     /**
      * 暴露给开发者修改BeanFactory的方法

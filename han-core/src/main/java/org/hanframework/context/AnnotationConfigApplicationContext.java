@@ -107,8 +107,8 @@ public class AnnotationConfigApplicationContext extends AbstractApplicationConte
     }
 
     public void run(String... args) {
-        prepareEnvironment(args);
-        super.refresh();
+        prepareEnvironment(new EnvParseContext(args,  "utf8"));
+        refresh();
     }
 
 

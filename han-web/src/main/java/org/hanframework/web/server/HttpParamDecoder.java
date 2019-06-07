@@ -29,7 +29,7 @@ public class HttpParamDecoder {
       HttpMethod method = request.method();
       if (HttpMethod.GET == method) {
         // 是GET请求
-        QueryStringDecoder decoder = new QueryStringDecoder(request.getUri());
+        QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
         decoder.parameters().entrySet().forEach(entry -> {
           paramMap.put(entry.getKey(), entry.getValue().get(0));
         });

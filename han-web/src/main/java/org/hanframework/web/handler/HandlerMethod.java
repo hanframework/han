@@ -1,10 +1,13 @@
 package org.hanframework.web.handler;
 
+import org.hanframework.beans.beandefinition.ValueHolder;
+import org.hanframework.beans.beandefinition.ValueHolderFactory;
 import org.hanframework.beans.beanfactory.BeanFactory;
 import org.hanframework.beans.postprocessor.impl.MethodParameter;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author liuxin
@@ -22,12 +25,15 @@ public class HandlerMethod {
 
     private final MethodParameter[] parameters;
 
+    private final List<ValueHolder> valueHolders;
+
     public HandlerMethod(Object bean, BeanFactory beanFactory, Class<?> beanType, Method method, MethodParameter[] parameters) {
         this.bean = bean;
         this.beanFactory = beanFactory;
         this.beanType = beanType;
         this.method = method;
         this.parameters = parameters;
+        this.valueHolders = ValueHolderFactory.valueHolder(method);
     }
 
     public Object getBean() {
