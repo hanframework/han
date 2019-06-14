@@ -5,10 +5,12 @@ import org.hanframework.beans.beanfactory.impl.ObjectFactory;
 import org.hanframework.beans.factorybean.FactoryBean;
 import org.hanframework.beans.parse.ConfigurationBeanMethod;
 import org.hanframework.beans.ConstructorBuilder;
+import org.hanframework.beans.sort.Order;
 import org.hanframework.tool.annotation.AnnotationTools;
 import org.hanframework.tool.annotation.type.AnnotationMetadata;
 import org.hanframework.tool.asserts.Assert;
 import org.hanframework.tool.reflection.ClassTools;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
@@ -68,6 +70,14 @@ public abstract class AbstractBeanDefinition implements ConfigurableBeanDefiniti
         this.customerInstantiationFactory = customerInstantiationFactory;
     }
 
+
+    @Override
+    public int getOrder() {
+        if (getAnnotationMetadata().hasAnnotation(Order.class)) {
+            return getAnnotationMetadata().getAnnotation(Order.class).value();
+        }
+        return 0;
+    }
 
     @Override
     public String getInitMethodName() {

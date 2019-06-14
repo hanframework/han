@@ -156,7 +156,6 @@ public class URL {
                 ", protocol='" + protocol + '\'' +
                 ", path='" + path + '\'' +
                 ", variable=" + variable +
-                ", variableIndexMap=" + variableIndexMap +
                 '}';
     }
 

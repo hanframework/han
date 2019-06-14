@@ -3,8 +3,10 @@ package org.hanframework.web.handler;
 import org.hanframework.beans.beandefinition.BeanDefinition;
 import org.hanframework.beans.beanfactory.lifecycle.InitializingBean;
 import org.hanframework.context.ApplicationContext;
+import org.hanframework.context.ConfigurableApplicationContext;
 import org.hanframework.context.aware.ApplicationContextAware;
 import org.hanframework.tool.annotation.type.AnnotationMetadata;
+import org.hanframework.web.tool.MethodHandlerWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +41,7 @@ public abstract class AbstractHandlerMapping<T> implements ApplicationContextAwa
 
 
     private void initHandlerMethods() {
-        Map<String, BeanDefinition> beanDefinition = applicationContext.getBeanFactory().getBeanDefinition();
+        Map<String, BeanDefinition> beanDefinition = ((ConfigurableApplicationContext) applicationContext).getBeanFactory().getBeanDefinition();
         for (Map.Entry<String, BeanDefinition> beanDefinitionEntry : beanDefinition.entrySet()) {
             String beanKey = beanDefinitionEntry.getKey();
             BeanDefinition definitionEntryValue = beanDefinitionEntry.getValue();
@@ -53,7 +55,7 @@ public abstract class AbstractHandlerMapping<T> implements ApplicationContextAwa
                         Object requestMappingInfo = createRequestMappingInfo(method);
                         List<URL> urls = buildURL(method);
                         for (URL url : urls) {
-                            registerHandlerMethod(handler, method, url);
+                            registerHandlerMethod(handler, method, url, isView(method), (T) requestMappingInfo);
                             urlAndRequestMapping.put(url, (T) requestMappingInfo);
                         }
                     }
@@ -88,7 +90,7 @@ public abstract class AbstractHandlerMapping<T> implements ApplicationContextAwa
      * @param url 路径地址
      * @return HandlerMethod
      */
-    public abstract HandlerMethod getHandlerMethod(URL url);
+    public abstract MethodHandlerWrapper getMethodHandler(URL url);
 
 
     /**
@@ -125,11 +127,20 @@ public abstract class AbstractHandlerMapping<T> implements ApplicationContextAwa
 
 
     /**
+     * 判断方法是否支持视图
+     *
+     * @param method 当前处理方法
+     * @return boolean
+     */
+    protected abstract boolean isView(Method method);
+
+    /**
      * 将url与处理方法绑定
      *
      * @param handler 处理类
      * @param method  当前方法
      * @param url     路径
+     * @param view    是否支持视图
      */
-    protected abstract void registerHandlerMethod(Object handler, Method method, URL url);
+    protected abstract void registerHandlerMethod(Object handler, Method method, URL url, boolean view, T requestInfo);
 }

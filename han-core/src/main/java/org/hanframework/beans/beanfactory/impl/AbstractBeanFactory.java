@@ -1,7 +1,9 @@
 package org.hanframework.beans.beanfactory.impl;
 
 import org.hanframework.beans.factorybean.FactoryBean;
+import org.hanframework.beans.sort.BeanDefinitionSortTools;
 import org.hanframework.tool.reflection.MethodTools;
+import org.hanframework.tool.string.StringTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.hanframework.beans.beandefinition.BeanDefinition;
@@ -33,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, BeanFactory {
 
-    protected Logger logger = LoggerFactory.getLogger(AbstractBeanFactory.class);
+    protected Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
      *
@@ -379,6 +381,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Be
      */
     @Override
     public void preInstantiateSingletons() {
+        BeanDefinitionSortTools.sort(getBeanDefinition());
         Iterator<Map.Entry<String, BeanDefinition>> iterator = getBeanDefinition().entrySet().iterator();
         while (iterator.hasNext()) {
             Map.Entry<String, BeanDefinition> next = iterator.next();
@@ -415,7 +418,7 @@ public abstract class AbstractBeanFactory implements ConfigurableBeanFactory, Be
                 }
                 //执行xml中配置的
                 try {
-                    if (null != destroyMethodName) {
+                    if (!StringTools.isNullOrEmpty(destroyMethodName)) {
                         MethodTools.findMethodByName(singleton.getClass(), destroyMethodName).invoke(singleton);
                     }
                 } catch (Exception i) {

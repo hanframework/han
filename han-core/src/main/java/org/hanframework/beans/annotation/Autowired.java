@@ -6,7 +6,7 @@ import java.lang.annotation.*;
  * @author liuxin
  * @version Id: Autowired.java, v 0.1 2018/10/30 2:14 PM
  */
-@Target({ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.METHOD})
+@Target({ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.METHOD,ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Autowired {

@@ -9,8 +9,8 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.IdleStateHandler;
-import org.hanframework.web.server.handler.HanChannelHandler;
-import org.hanframework.web.server.handler.NettyWebServerHandler;
+import org.hanframework.web.server.handler.EnhanceChannelHandler;
+import org.hanframework.web.server.handler.NettyExchangeWebServerHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +25,9 @@ public abstract class WebHandlerChannelInitializer extends ChannelInitializer<Ch
 
     private final WebSocketPathManager webSocketPathManager = new WebSocketPathManager();
 
-    private final HanChannelHandler hanChannelHandler;
+    private final EnhanceChannelHandler hanChannelHandler;
 
-    public WebHandlerChannelInitializer(HanChannelHandler hanChannelHandler) {
+    public WebHandlerChannelInitializer(EnhanceChannelHandler hanChannelHandler) {
         this.hanChannelHandler = hanChannelHandler;
     }
 
@@ -50,7 +50,7 @@ public abstract class WebHandlerChannelInitializer extends ChannelInitializer<Ch
         cp.addLast("compress", new HttpContentCompressor());
         cp.addLast("http-chunked", new ChunkedWriteHandler());
         cp.addLast(new WebSocketServerProtocolHandler("/ws"));
-        cp.addLast("handler", new NettyWebServerHandler(hanChannelHandler));
+        cp.addLast("handler", new NettyExchangeWebServerHandler(hanChannelHandler));
     }
 
 

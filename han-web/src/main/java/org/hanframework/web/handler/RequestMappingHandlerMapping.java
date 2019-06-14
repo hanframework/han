@@ -2,8 +2,6 @@ package org.hanframework.web.handler;
 
 import static org.hanframework.tool.annotation.AnnotationTools.*;
 
-import org.hanframework.beans.annotation.Autowired;
-import org.hanframework.beans.annotation.HanComponent;
 import org.hanframework.tool.annotation.AnnotationMap;
 import org.hanframework.tool.annotation.AnnotationTools;
 import org.hanframework.tool.annotation.type.AnnotationMetadata;
@@ -13,6 +11,7 @@ import org.hanframework.web.annotation.RestController;
 import org.hanframework.web.annotation.WebSocket;
 import org.hanframework.web.condition.*;
 import org.hanframework.web.core.MappingRegistry;
+import org.hanframework.web.tool.MethodHandlerWrapper;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -37,7 +36,7 @@ import java.util.List;
 public class RequestMappingHandlerMapping extends AbstractHandlerMapping<RequestMappingInfo> {
 
 
-    MappingRegistry registry;
+    private MappingRegistry registry;
 
 
     public RequestMappingHandlerMapping(MappingRegistry registry) {
@@ -104,12 +103,17 @@ public class RequestMappingHandlerMapping extends AbstractHandlerMapping<Request
     }
 
     @Override
-    protected void registerHandlerMethod(Object handler, Method method, URL url) {
-        this.registry.register(url, handler, method);
+    protected void registerHandlerMethod(Object handler, Method method, URL url, boolean view, RequestMappingInfo requstInfo) {
+        this.registry.register(url, handler, method, view,requstInfo);
     }
 
     @Override
-    public HandlerMethod getHandlerMethod(URL url) {
+    public MethodHandlerWrapper getMethodHandler(URL url) {
         return registry.selector(url);
+    }
+
+    @Override
+    protected boolean isView(Method method) {
+        return false;
     }
 }

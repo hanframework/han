@@ -1,6 +1,8 @@
 package org.hanframework.web.condition;
 
+import lombok.Getter;
 import org.hanframework.web.handler.HttpRequestAnnotationMetaData;
+import org.hanframework.web.http.HttpHeaders;
 
 /**
  * 服务端到客户端的请求条件验证
@@ -10,6 +12,9 @@ import org.hanframework.web.handler.HttpRequestAnnotationMetaData;
  */
 public class ProducesRequestCondition implements RequestCondition {
     private HttpRequestAnnotationMetaData httpRequestAnnotationMetaData;
+
+    @Getter
+    private HttpHeaders httpHeaders;
 
     public ProducesRequestCondition(HttpRequestAnnotationMetaData httpRequestAnnotationMetaData) {
         this.httpRequestAnnotationMetaData = httpRequestAnnotationMetaData;

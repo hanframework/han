@@ -2,20 +2,20 @@ package org.hanframework.tool.common;
 
 
 /**
- * @Package: smile.common
- * @Description: 默认取值工具包
- * @author: liuxin
- * @date: 2017/10/11 上午11:17
+ * @author liuxin
+ * @date 2017/10/11 上午11:17
  */
 public class Default {
-    public static <T> T defaultValue(Object str, Object defaultValue, Class<T> cls) {
-        T value = null;
-        if (str == null) {
-            value = ((T) defaultValue);
+
+    @SuppressWarnings("unchecked")
+    public static <T> T defaultValue(Object value, Object defaultValue, Class<T> genericType) {
+        if (null != value) {
+            return (T) value;
+        } else if (null != defaultValue) {
+            return (T) defaultValue;
         } else {
-            value = ((T) str);
+            throw new IllegalArgumentException("参数不能都为空");
         }
-        return value;
     }
 
     public static <T> T defaultValue(Object str, Object defaultValue, DefaultIF<T> defaultIf) {

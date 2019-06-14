@@ -1,6 +1,5 @@
 package org.hanframework.context;
 
-import lombok.extern.slf4j.Slf4j;
 import org.hanframework.env.ConfigurableEnvironment;
 import org.hanframework.env.Environment;
 import org.hanframework.env.StandardEnvironment;
@@ -32,7 +31,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class AbstractApplicationContext implements ConfigurableApplicationContext {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    protected final Logger log = LoggerFactory.getLogger(getClass());
+
+
+    private long startTime;
+
+    protected StopWatch stopWatch = new StopWatch();
     /**
      * 系统启动标识
      */
@@ -219,6 +223,7 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
         if (log.isInfoEnabled()) {
             log.info("Start or Refreshing initializing the container");
         }
+        this.startTime = System.currentTimeMillis();
     }
 
     private ConfigurableEnvironment createEnvironment() {
@@ -226,12 +231,15 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
     }
 
 
+    public long getStartTime() {
+        return startTime;
+    }
+
     /**
      * 扫描所有的类,并装载
      * 当调用该方法spring就开始启动工作
      */
     protected void refresh() {
-        StopWatch stopWatch = new StopWatch("Application耗时统计");
         //保存系统启动时间和当前运行状态
         stopWatch.start("Prepare Refresh Application");
         prepareRefresh();
@@ -290,7 +298,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
         stopWatch.start("Finish Refresh Application");
         finishRefresh();
         stopWatch.stop();
-        log.debug(stopWatch.prettyPrint());
 
     }
 
@@ -372,5 +379,6 @@ public abstract class AbstractApplicationContext implements ConfigurableApplicat
         return ((DefaultListableBeanFactory) getBeanFactory()).containsBean(var1);
     }
 
-
+    @Override
+    public abstract String applicationName();
 }

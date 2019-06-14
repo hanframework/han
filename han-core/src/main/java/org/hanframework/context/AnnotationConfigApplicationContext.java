@@ -6,9 +6,12 @@ import org.hanframework.beans.beanfactory.impl.DefaultListableBeanFactory;
 import org.hanframework.beans.parse.AbstractCustomerBeanDefinitionParser;
 import org.hanframework.beans.parse.AnnotationBeanDefinitionParser;
 import org.hanframework.beans.parse.BeanDefinitionParser;
+import org.hanframework.core.StartupInfoLogger;
 import org.hanframework.core.classpathscan.AnnotationScanningCandidateClassProvider;
+import org.hanframework.tool.reflection.ClassTools;
 
 import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -28,7 +31,7 @@ public class AnnotationConfigApplicationContext extends AbstractApplicationConte
      * 类似于SpringBoot中的main方法。主要获取要扫描的包
      * ComponentScan的信息
      */
-    private Class onComponentScanCls;
+    private Class primarySources;
 
 
     /**
@@ -60,8 +63,8 @@ public class AnnotationConfigApplicationContext extends AbstractApplicationConte
     public AnnotationConfigApplicationContext() {
     }
 
-    public AnnotationConfigApplicationContext(Class onComponentScanCls) {
-        this.onComponentScanCls = onComponentScanCls;
+    public AnnotationConfigApplicationContext(Class primarySources) {
+        this.primarySources = primarySources;
     }
 
 
@@ -74,7 +77,7 @@ public class AnnotationConfigApplicationContext extends AbstractApplicationConte
         //自定义一个扫描器
         //1. 根据要扫描的包,或者是根据读取配置类的@Scanner扫描注解实现基本扫描功能
         //2. 实现过滤功能
-        classes = annotationScanningCandidateClassProvider.scan(onComponentScanCls);
+        classes = annotationScanningCandidateClassProvider.scan(primarySources);
         //调用BeanDefinitionParse解析
         //1. 过滤一遍之要被SmileBean标记过的,和@Config标记过的，@DefaultBeanDefinitionParse
         //2. 另外支持用户自定义的，但是要有自定义的解析器 CustomerBeanDefinitionParse的实现类
@@ -96,9 +99,7 @@ public class AnnotationConfigApplicationContext extends AbstractApplicationConte
      * @see BeanDefinitionParser
      */
     public void register(Class<?>... annotatedClasses) {
-        for (Class cls : annotatedClasses) {
-            scanClass.add(cls);
-        }
+        Collections.addAll(scanClass, annotatedClasses);
     }
 
     @Override
@@ -107,9 +108,14 @@ public class AnnotationConfigApplicationContext extends AbstractApplicationConte
     }
 
     public void run(String... args) {
-        prepareEnvironment(new EnvParseContext(args,  "utf8"));
+        prepareEnvironment(new EnvParseContext(args, "utf8"));
         refresh();
+        new StartupInfoLogger(primarySources).logStarted(log, stopWatch,true);
     }
 
 
+    @Override
+    public String applicationName() {
+        return ClassTools.getShortName(primarySources);
+    }
 }

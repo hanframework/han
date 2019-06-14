@@ -47,20 +47,20 @@ public final class AnnotationScanningCandidateClassProvider {
     }
 
     /**
-     * @param cls 将要被扫描的字节码,注意该字节码一定要包含@ComponentScan注解
-     * @return
+     * @param primarySources 将要被扫描的字节码,注意该字节码一定要包含@ComponentScan注解
+     * @return 扫描到的字节码
      */
-    public Set<Class> scan(Class<?> cls) {
+    public Set<Class> scan(Class<?> primarySources) {
         Set<Class> classesByPackages = new ConcurrentHashSet<>();
         //当被PostProcessor标记则从配置中读取,处理器
         classesByPackages.addAll(HanFactoriesLoader.getAutoConfigure(BeanProcessor.class));
         classesByPackages.addAll(HanFactoriesLoader.getAutoConfigure(BeanFactoryProcessor.class));
         classesByPackages.addAll(HanFactoriesLoader.getAutoConfigure(BeanDefinitionParsers.class));
-        if (cls == null || !AnnotationTools.isContainsAnnotation(cls, ComponentScan.class)) {
-            log.warn("cls should contain ComponentScan.class: cls=[" + cls + "] not contain ComponentScan.class");
+        if (primarySources == null || !AnnotationTools.isContainsAnnotation(primarySources, ComponentScan.class)) {
+            log.warn("bootstrap class should contain ComponentScan.class: cls=[" + primarySources + "] not contain ComponentScan.class");
             return classesByPackages;
         }
-        AnnotationMetadata annotationMetadata = AnnotationTools.getAnnotationMetadata(cls);
+        AnnotationMetadata annotationMetadata = AnnotationTools.getAnnotationMetadata(primarySources);
         //读取自动配置
         if (annotationMetadata.hasAnnotation(EnableAutoConfiguration.class)) {
             classesByPackages.addAll(HanFactoriesLoader.getAutoConfigure(EnableAutoConfiguration.class));
@@ -72,7 +72,7 @@ public final class AnnotationScanningCandidateClassProvider {
         //当没有指定扫描包,则从当前目录向下扫描
         if (scanPackages.length == 0) {
             scanPackages = new String[1];
-            scanPackages[0] = ClassTools.getPackageName(cls);
+            scanPackages[0] = ClassTools.getPackageName(primarySources);
         }
         for (String packagePath : scanPackages) {
             Set<Class<?>> classesByPackage;
@@ -113,13 +113,13 @@ public final class AnnotationScanningCandidateClassProvider {
 
 
     private List<TypeFilter> typeFiltersFor(ComponentScan componentScan) {
-        List<TypeFilter> typeFilters = new ArrayList();
+        List<TypeFilter> typeFilters = new ArrayList<>();
         ComponentScan.Filter[] filters = componentScan.excludeFilters();
         for (ComponentScan.Filter filter : filters) {
             FilterType filterType = filter.type();
             switch (filterType) {
                 case REGEX:
-                    System.err.println("正则匹配现在不支持");
+                    log.error("正则匹配现在不支持");
                     break;
                 case CUSTOM:
                     Arrays.stream(filter.value()).map(BeanTools::newInstance).forEach(typeFilters::add);

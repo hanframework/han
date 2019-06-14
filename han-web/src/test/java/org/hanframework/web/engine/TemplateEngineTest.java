@@ -29,7 +29,6 @@ public class TemplateEngineTest {
     Map map  =new HashMap();
     map.put("name","Hutool");
     String result = template.render(map);
-
     System.out.println(result);
 
 

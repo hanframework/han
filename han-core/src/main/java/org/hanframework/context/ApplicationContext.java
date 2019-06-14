@@ -1,14 +1,12 @@
 package org.hanframework.context;
-
-import org.hanframework.beans.beanfactory.ConfigurableBeanFactory;
 import org.hanframework.env.Configuration;
 
 /**
  * 最小化接口
  * 通过把接口细分,把实现细分,然后通过多继承的方式,实现
  *
- * @author: liuxin
- * @date: 2017/11/17 下午11:52
+ * @author liuxin
+ * @date 2017/11/17 下午11:52
  */
 public interface ApplicationContext {
 
@@ -48,16 +46,11 @@ public interface ApplicationContext {
     boolean containsBean(String name);
 
     /**
-     * 全局bean工厂,容器中只存在一个实例
-     *
-     * @return bean实例
-     */
-    ConfigurableBeanFactory getBeanFactory();
-
-    /**
      * 容器中集中化配置
      *
      * @return 全局配置
      */
     Configuration getConfiguration();
+
+    String applicationName();
 }

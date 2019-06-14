@@ -61,6 +61,9 @@ public class ApplicationContextAwareProcessor implements BeanPostProcessor {
             if (bean instanceof BeanNameAware) {
                 ((BeanNameAware) bean).setBeanName(beanName);
             }
+            if (bean instanceof ConfigurationAware) {
+                ((ConfigurationAware) bean).setConfiguration(beanFactory.getConfiguration());
+            }
         }
     }
 }

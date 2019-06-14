@@ -1,6 +1,7 @@
 package org.hanframework.web.handler;
 
 import lombok.Builder;
+import lombok.Getter;
 import lombok.Setter;
 import org.hanframework.web.condition.*;
 
@@ -21,7 +22,7 @@ public class RequestMappingInfo {
     private final HeadersRequestCondition headersCondition;
 
     private final ConsumesRequestCondition consumesCondition;
-
+    @Getter
     private final ProducesRequestCondition producesCondition;
 
     public RequestMappingInfo(RequestMethodsRequestCondition requestMethodsRequestCondition, ParamsRequestCondition paramsCondition, HeadersRequestCondition headersCondition, ConsumesRequestCondition consumesCondition, ProducesRequestCondition producesCondition) {

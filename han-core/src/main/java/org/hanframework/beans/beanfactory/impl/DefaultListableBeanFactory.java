@@ -93,7 +93,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         if (requiredType.getGenericSuperclass() instanceof FactoryBean) {
 
         }
-        if (!ClassTools.isInterface(requiredType)) {
+        if (!ClassTools.isInterface(requiredType) && !ClassTools.isAbstract(requiredType)) {
             String beanName = getBeanDefinition(beanNameGenerator.generateBeanName(requiredType)).getBeanName();
             return (T) getBean(beanName);
         }

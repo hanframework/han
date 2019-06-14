@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import org.hanframework.web.annotation.HttpMethod;
 import org.hanframework.web.http.HttpHeaders;
+
 import java.util.Map;
 
 /**
@@ -16,14 +17,18 @@ import java.util.Map;
 @AllArgsConstructor
 public final class Request {
 
-  final String httpVersion;
+    private final String id;
 
-  final String url;
+    private final String httpVersion;
 
-  final HttpMethod httpMethod;
+    private final String url;
 
-  final HttpHeaders httpHeaders;
+    private final HttpMethod httpMethod;
 
-  final Map<String, Object> paramMap;
+    private final HttpHeaders httpHeaders;
+
+    private final Map<String, Object> paramMap;
+
+    private HttpSession session;
 
 }

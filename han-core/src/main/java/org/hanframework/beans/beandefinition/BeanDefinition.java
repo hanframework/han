@@ -84,4 +84,7 @@ public interface BeanDefinition extends LifeCycleOnReadyDefinition {
      */
     boolean isPrimary();
 
+
+    int getOrder();
+
 }

@@ -62,7 +62,7 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
         if (AnnotationTools.isContainsAnnotation(dependencyDescriptor.getAnnotations(), Value.class)) {
             return VALUE_TYPE;
         }
-        if (AnnotationTools.isContainsAnnotation(dependencyDescriptor.getAnnotations(), Autowired.class, InsertBean.class)) {
+        if (AnnotationTools.isContainsAnnotation(dependencyDescriptor.getAnnotations(), Autowired.class) || AnnotationTools.isContainsAnnotation(dependencyDescriptor.getAnnotations(), InsertBean.class)) {
             return BEAN_TYPE;
         }
         return -1;

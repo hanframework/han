@@ -55,6 +55,7 @@ public class ConfigurationBeanMethod {
         try {
             return beanMethod.invoke(parentBean, args);
         } catch (Exception e) {
+            e.printStackTrace();
             System.err.println(e.getMessage());
         }
         return null;

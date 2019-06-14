@@ -11,6 +11,7 @@ import org.hanframework.tool.yaml.YamlTools;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -87,7 +88,7 @@ public class HanFactoriesLoader {
                 String classKeyPath = (String) keys.nextElement();
                 Class<?> interfaceCls = Class.forName(classKeyPath);
                 Set<Class> implsCls = FACTORIES_CLASS_CACHE.get(interfaceCls);
-                if (null == implsCls) {
+                if (!FACTORIES_CLASS_CACHE.containsKey(interfaceCls)) {
                     implsCls = new HashSet<>();
                     FACTORIES_CLASS_CACHE.put(interfaceCls, implsCls);
                 }

@@ -237,14 +237,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * @return 从容器中找到的类型值
      */
     private Object argForType(ValueHolder valueHolder) {
+        List<Annotation> parameterAnnotations = valueHolder.getParameterAnnotations();
         Class<Object> type = valueHolder.getParameterType();
-        AnnotationMetadata annotationMetadata = AnnotationTools.getAnnotationMetadata(type);
-        if (annotationMetadata.hasAnnotation(Value.class)) {
+        if (AnnotationTools.isContainsAnnotation(parameterAnnotations,Value.class)) {
             List<Annotation> fieldAnnotations = valueHolder.getParameterAnnotations();
-            String result = getValueForProfile(fieldAnnotations, AnnotationTools.findAnnotation(type, Value.class));
+            String result = getValueForProfile(fieldAnnotations, AnnotationTools.findAnnotation(parameterAnnotations, Value.class));
             return getTypeConverter().convertIfNecessary(result, type);
-        } else if (annotationMetadata.hasAnnotation(Autowired.class)) {
-            Autowired autowired = annotationMetadata.getAnnotation(Autowired.class);
+        } else if (AnnotationTools.isContainsAnnotation(parameterAnnotations,Autowired.class)) {
+            Autowired autowired = AnnotationTools.findAnnotation(parameterAnnotations,Autowired.class);
             String beanName = autowired.beanName();
             Object result = FunctionTools.chooseSupplier(StringTools.isEmpty(beanName), () -> resolveDependency(type), () -> resolveDependency(beanName));
             if (autowired.required()) {

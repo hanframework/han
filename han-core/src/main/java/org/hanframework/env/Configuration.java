@@ -5,7 +5,9 @@ import org.hanframework.beans.beanfactory.ConfigurableBeanFactory;
 import org.hanframework.beans.beanfactory.convert.TypeConverterRegistry;
 import org.hanframework.beans.condition.ConditionFilterRegistry;
 import org.hanframework.context.ApplicationContext;
+import org.hanframework.context.ConfigurableApplicationContext;
 import org.hanframework.env.resolver.MultiPropertyResolver;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +40,7 @@ public final class Configuration {
     private final Map<ModuleInfo, ModuleConfiguration> modulesConfiguration = new ConcurrentHashMap<>();
 
     public Configuration(ApplicationContext applicationContext) {
-        ConfigurableBeanFactory beanFactory = applicationContext.getBeanFactory();
+        ConfigurableBeanFactory beanFactory = ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
         conditionFilterRegistry = new ConditionFilterRegistry((BeanFactory) beanFactory);
         beanFactory.setConfiguration(this);
         //类型转换器工厂创建

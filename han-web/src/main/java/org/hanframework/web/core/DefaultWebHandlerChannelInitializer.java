@@ -1,7 +1,7 @@
 package org.hanframework.web.core;
 
 import org.hanframework.web.handler.URL;
-import org.hanframework.web.server.handler.HanChannelHandler;
+import org.hanframework.web.server.handler.EnhanceChannelHandler;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,7 +16,7 @@ public class DefaultWebHandlerChannelInitializer extends WebHandlerChannelInitia
     private MappingRegistry mappingRegistry;
 
 
-    public DefaultWebHandlerChannelInitializer(HanChannelHandler hanChannelHandler, MappingRegistry mappingRegistry) {
+    public DefaultWebHandlerChannelInitializer(EnhanceChannelHandler hanChannelHandler, MappingRegistry mappingRegistry) {
         super(hanChannelHandler);
         this.mappingRegistry = mappingRegistry;
     }

@@ -18,5 +18,10 @@
             <artifactId>logback-classic</artifactId>
             <version>1.2.3</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.lxchinesszz</groupId>
+            <artifactId>han-tool</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>
