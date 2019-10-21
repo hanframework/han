@@ -23,7 +23,7 @@
         <gson.version>2.2.4</gson.version>
         <fastjson.version>2.9.9</fastjson.version>
         <yaml.version>1.17</yaml.version>
-        <netty.version>4.1.32.Final</netty.version>
+        <netty.version>4.1.42.Final</netty.version>
         <junit.version>4.12</junit.version>
         <lombok.version>1.18.4</lombok.version>
         <hutool-all>4.1.19</hutool-all>
